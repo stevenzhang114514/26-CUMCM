@@ -29,7 +29,7 @@ sys.path.insert(0, str(ROOT))
 from src.config import (DOC_DIR, H_COEF, HM_COEF, NUMERICS, PROPS_APP2, RESULT_DIR,
                         T_END, T_START, check_units, derived_numbers)
 from src.data_prep.env_interp import EnvInterpolator, load_env
-from src.io.excel_writer import print_validation, validate_output, write_result1
+from src.io.excel_writer import print_validation, validate_output, write_meta, write_result1
 from src.io.resample import check_no_overshoot, output_radii_m, sample_field
 from src.models.problem1 import Problem1Setup, solve_problem1
 from src.numerics.fvm_cyl import Grid, assemble
@@ -188,8 +188,10 @@ def main():
         "接受步/拒绝步": f"{res.n_accepted} / {res.n_rejected}",
     }
     out_path = RESULT_DIR / "result1.xlsx"
-    write_result1(out_path, t_int, T_out, C_out, meta=meta)
-    print(f"    已写出 {out_path}")
+    write_result1(out_path, t_int, T_out, C_out)
+    meta_path = RESULT_DIR / "result1_运行信息.xlsx"
+    write_meta(meta_path, meta)
+    print(f"    已写出 {out_path}（运行信息单独存于 {meta_path.name}）")
 
     rep = validate_output(out_path, expect_t=t_int)
     ok_out = print_validation(rep)

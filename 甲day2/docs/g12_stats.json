@@ -1,0 +1,10 @@
+{
+  "t_max_h": 57.48887557983399,
+  "t_max_source": "day2_core.json",
+  "t_avg_h": 36.0448894904989,
+  "t_surf_h": 12.553406892462556,
+  "underestimate_h": 21.443986089335084,
+  "underestimate_pct": 37.3011054278773,
+  "argmax_always_at_center": true,
+  "note": "argmax 已逐时刻核对，未默认'最大值在中心'"
+}

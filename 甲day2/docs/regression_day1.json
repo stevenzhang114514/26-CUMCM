@@ -1,0 +1,64 @@
+{
+  "L1_算子逐元素": {
+    "cases": [
+      {
+        "N": 40,
+        "grading": 1.0,
+        "cap": "None",
+        "max_abs_diff": 0.0,
+        "rel": 0.0,
+        "bitwise_equal": true
+      },
+      {
+        "N": 200,
+        "grading": 1.5,
+        "cap": "None",
+        "max_abs_diff": 0.0,
+        "rel": 0.0,
+        "bitwise_equal": true
+      },
+      {
+        "N": 137,
+        "grading": 2.2,
+        "cap": "None",
+        "max_abs_diff": 0.0,
+        "rel": 0.0,
+        "bitwise_equal": true
+      },
+      {
+        "N": 200,
+        "grading": 1.5,
+        "cap": "rand",
+        "max_abs_diff": 0.0,
+        "rel": 0.0,
+        "bitwise_equal": true
+      }
+    ],
+    "max_abs_diff": 0.0,
+    "ok": true
+  },
+  "L3_cap_cell自洽": {
+    "max_abs_diff": 3.552713678800501e-15,
+    "rel": 1.7653412467234628e-16,
+    "ok": true
+  },
+  "L2_问题1重算": {
+    "ok": true,
+    "diffs": {
+      "温度": {
+        "max_abs": 4.999929560156602e-05,
+        "n_over_half_ulp": 0,
+        "n_cells": 37800,
+        "mean_abs": 2.4316171376827313e-05
+      },
+      "水分浓度": {
+        "max_abs": 4.999966791796595e-05,
+        "n_over_half_ulp": 0,
+        "n_cells": 37800,
+        "mean_abs": 1.5208710025548138e-05
+      }
+    },
+    "note": "对照文件已舍入到 4 位小数，故判据是差异不超过 ±5e-5（半个舍入量子）"
+  },
+  "总体通过": true
+}
