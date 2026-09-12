@@ -1,0 +1,143 @@
+\section{问题1：预热平衡阶段}
+
+\subsection{模型建立}
+
+预热平衡阶段采用附录2 的\textbf{常物性}，温度方程与水分方程分别为
+\begin{equation}
+  \rho c_p\frac{\partial T}{\partial t}
+  =\frac{k}{r}\frac{\partial}{\partial r}\!\left(r\frac{\partial T}{\partial r}\right),
+  \qquad
+  \frac{\partial C}{\partial t}
+  =\frac{1}{r}\frac{\partial}{\partial r}\!\left(D(C)\,r\frac{\partial C}{\partial r}\right),
+\end{equation}
+\begin{equation}
+  D(C)=7\times10^{-9}\exp\!\left(-\frac{0.89}{C}\right)\quad[\mathrm{m^2/s}] .
+\end{equation}
+
+\textbf{结构性单向耦合}：$D$ \textbf{不含温度}，温度方程只通过``物性是否随 $C$ 变''
+与水场耦合，而附录2 给的是常物性。故问题1 可严格拆成
+\textbf{水分场独立求解 $\to$ 温度场代入已知 $C(r,t)$ 求解}。
+这不是``为了省事''，而是方程结构本身允许的降维。
+
+\textbf{初始条件与边界条件}：
+\begin{equation}
+  T(r,0)=28\ ^\circ\mathrm{C},\quad C(r,0)=2.55\ \mathrm{kg/kg};
+\end{equation}
+\begin{equation}
+  r=0:\ \frac{\partial T}{\partial r}=\frac{\partial C}{\partial r}=0;
+\end{equation}
+\begin{equation}
+  r=R_0:\ -k\frac{\partial T}{\partial r}\bigg|_{R}=h\left(T_s-T_\infty\right),
+  \qquad
+  -D\frac{\partial C}{\partial r}\bigg|_{R}=h_m\left(C_s-\Cinf\right).
+\end{equation}
+
+\subsection{数值方法}
+
+\textbf{空间离散}：采用有限体积法（FVM），中心用\textbf{半控制体}
+（半径 $\Delta r/2$ 的实心圆柱），天然规避 $1/r$ 奇点；
+界面通量用\textbf{调和平均}，保证变 $D$ 时通量正确。
+
+\textbf{网格}：均匀网格在表面早期欠分辨（$t=1$ s 时边界层厚度仅 $0.07$ mm，
+均匀 $N=640$ 误差仍达 $4\times10^{-4}$）。故采用向表面加密的\textbf{渐变网格}
+$N=200$、$\gamma=1.5$（$\Delta r=0.00707\sim0.14981$ mm），
+以约一半计算量取得优于均匀 $N=640$ 的精度。
+
+\textbf{时间推进}：半控制体 FVM 中心处的显式稳定性上限约 $\Delta r^{2}/(4\alpha)$，
+均匀网格 $\Delta r=0.5$ mm 时为 $0.37$ s，无法满足 1 s 输出要求。
+故采用 L-稳定的 \textbf{Backward Euler} 隐式推进，步长由误差控制自适应调整，
+输出时刻精确落点。
+
+\textbf{非线性迭代}：水分方程因 $D(C)$ 非线性，采用 \textbf{Picard 迭代}，
+保持 M-矩阵性质，$C$ 的正性由构造保证（平均 2.92 次、最多 3 次）。
+收敛采用尺度归一化的\textbf{双重判据}（更新量与真残差都要满足）。
+
+\textbf{输出采样}：$r=0$ 用偶函数二次外推，$0<r<R_0$ 用 PCHIP 保形插值，
+$r=R_0$ 用 Robin 边界重构值。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth]{FIG-08_fvm.png}
+  \caption{一维圆柱有限体积离散。(a) 横截面的环形控制体与中心半控制体；
+           (b) 径向剖面，界面通量与表面 Robin 重构}
+  \label{fig:FIG08}
+\end{figure}
+
+\subsection{结果}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\textwidth]{G4_p1_evolution.png}
+  \caption{问题1 温度场与含水率场的径向演化（0--1800 s）}
+  \label{fig:G4}
+\end{figure}
+
+\textbf{温度场}：表面温度从 $28\ ^\circ\mathrm{C}$ 升至约 $36.8\ ^\circ\mathrm{C}$，
+中心升至约 $33.6\ ^\circ\mathrm{C}$，表面始终高于中心，符合外部热风加热的物理过程。
+
+\textbf{含水率场}：中心含水率在 1800 s 内基本不变（$2.55$ kg/kg），
+表面从 $2.55$ 降至约 $1.51$ kg/kg，呈明显的\textbf{表面干燥}特征。
+
+\input{tables/tab1}
+\input{tables/tab2}
+
+完整结果见 \texttt{result1.xlsx}。
+
+\subsection{分析与讨论}
+
+\subsubsection*{（1）温度：表面升温快，中心严重滞后}
+
+$t=1800$ s 时中心 $33.5763\ ^\circ\mathrm{C}$、表面 $36.7861\ ^\circ\mathrm{C}$，
+\textbf{径向温差 $3.2098\ ^\circ\mathrm{C}$}，而中心仅完成烘房升温幅度的
+$(33.58-28)/(41.51-28)=41.3\%$。
+
+\begin{quote}
+  这直接印证 $Bi_T=1.389$：\textbf{内外导热阻力相当，集总参数模型不可用。}
+\end{quote}
+
+\subsubsection*{（2）水分：干燥完全被限制在表层，中心未被触及}
+
+\begin{table}[H]
+  \centering
+  \footnotesize
+  \begin{tabular}{@{}lccc@{}}
+    \toprule
+    位置 & $t=1800$ s 含水率 & 变化 & 降幅 \\
+    \midrule
+    中心 & 2.5500 & $\mathbf{0.0000}$（30 min 内完全未变） & 0 \\
+    表面 & 1.5103 & $-1.0073$ & $\mathbf{40.0\%}$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+$C=2.5$ kg/kg 的等值线（``干燥前沿''）位于 $r\approx1.3$ cm——
+即 30 min 内水分变化只发生在\textbf{外侧约 0.7 cm} 的薄层。
+
+\subsubsection*{（3）干燥前沿呈``由表及里推进''形态}
+
+从表 \ref{tab:p1C} 可见：表面持续单调下降；
+而 $1.0$ cm 处直到约 $t=900$ s 才开始可见变化，
+$1.5$ cm 处到 $t=1800$ s 才降 $0.17$。
+这正是``\textbf{表面是唯一的门}、内部水分必须接力外迁''的直接体现。
+
+\subsubsection*{（4）温度与水分的时间尺度差约 60 倍}
+
+传热特征时间 $R_0^{2}/\alpha\approx2369$ s，
+而传质特征时间 $R_0^{2}/D$（按 $D\approx5\times10^{-9}$ m$^2$/s）
+$\approx8\times10^{4}$ s。实测表现完全一致：
+\textbf{30 分钟内温度场已显著演化，而水分场只在表层动了 40\%}。
+
+\begin{quote}
+  \textbf{这解释了为什么烘干需要 2--3 天，而预热只需约 40 分钟。}
+\end{quote}
+
+\subsubsection*{（5）表面温度远未跟上烘房温度}
+
+$t=1800$ s 时烘房已达 $41.513\ ^\circ\mathrm{C}$，而药材表面仅 $36.7861\ ^\circ\mathrm{C}$
+——即表面只完成烘房升温幅度的 $65.0\%$。
+
+\begin{quote}
+  \textbf{注意}：这是 M0（\textbf{不含蒸发潜热项}）的结果。
+  若计入蒸发吸热，表面温度还会更低。
+  \textbf{M1 扩展不得直接套用本结论}，必须先在通量闭合的前提下重算。
+\end{quote}

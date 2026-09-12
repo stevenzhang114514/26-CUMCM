@@ -1,0 +1,16 @@
+1	配置与单位约定	config.py	196	01_config.py
+2	物性公式（附录2/3/4）	properties.py	158	02_properties.py
+3	FVM 离散（半控制体 / 调和平均 / 渐变网格）	fvm_cyl.py	376	03_fvm_cyl.py
+4	非线性迭代（Picard，双重判据）	nonlinear.py	110	04_nonlinear.py
+5	时间推进（Backward Euler + 自适应步长）	time_stepper.py	293	05_time_stepper.py
+6	双向耦合装配	coupled.py	179	06_coupled.py
+7	边界条件（M0 + M1 潜热）	boundary.py	271	07_boundary.py
+8	环境插值（附件1）	env_interp.py	159	08_env_interp.py
+9	长时环境外推（平台值）	env_extrap.py	155	09_env_extrap.py
+10	问题1 求解	problem1.py	146	10_problem1.py
+11	问题2 求解（全程变物性）	problem2.py	340	11_problem2.py
+12	问题3 阈值通过时刻（事件早停+二分）	problem3.py	248	12_problem3.py
+13	问题4 求解（材料坐标 + 收缩）	problem4.py	292	13_problem4.py
+14	问题3 二维轴对称端面对照	problem3_2d.py	392	14_problem3_2d.py
+15	主运行脚本（问题1–3）	run_day3.py	621	15_run_day3.py
+16	主运行脚本（问题4）	run_p4.py	256	16_run_p4.py

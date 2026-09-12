@@ -84,16 +84,27 @@ def fig_G12():
     Cmax = np.nanmax(C, axis=1)
     Ccen = C[:, 0]
     Csurf = C[:, -1]
-    # 面积权重：控制体面积 ∝（外径²-内径²）；用等距半径轴做梯形近似
-    rr = r_cm * 1e-2
-    edges = np.empty(len(rr) + 1)
-    edges[1:-1] = 0.5 * (rr[:-1] + rr[1:])
-    edges[0], edges[-1] = 0.0, rr[-1]
-    A = np.pi * (edges[1:] ** 2 - edges[:-1] ** 2)
-    Cavg = np.nansum(C * A, axis=1) / A.sum()
+
+    # 🔴 面积平均必须在**计算网格**上算，不能在 0.1 cm 的输出网格上算。
+    #    首版用输出网格（21 点等距）做梯形权重，得 t_avg = 35.34 h；
+    #    而权威值（`甲day3/docs/g12_stats.json`，用 FVM 控制体体积加权）
+    #    是 **36.04 h**，差了 0.7 h —— 因为输出网格分辨不了近表面的陡梯度，
+    #    且最外一格的面积占比很大。这里改用 npz 里 FVM 细网格上的 C_cells
+    #    与 grid.V 计算，与权威值一致。
+    from pathlib import Path as _P
+    import sys as _sys
+    _sys.path.insert(0, str(_P(__file__).resolve().parents[2] / "甲day3"))
+    from src.numerics.fvm_cyl import Grid as _Grid
+    z = P.core_npz("M0", full=True)
+    g = _Grid(N=z["C_cells"].shape[1], R0=0.02, grading=1.5)
+    V = g.V
+    Ccells = z["C_cells"]
+    n = min(Ccells.shape[0], z["t_diag"].shape[0])
+    Cavg = (Ccells[:n] * V).sum(axis=1) / V.sum()
+    t_avg_h = z["t_diag"][:n] / 3600.0
 
     t_max = P.TSTAR_H
-    t_avg = _first_crossing(t_h, Cavg)
+    t_avg = _first_crossing(t_avg_h, Cavg)
     t_srf = _first_crossing(t_h, Csurf)
 
     fig, axes = plt.subplots(1, 2, figsize=(13.4, 4.8),

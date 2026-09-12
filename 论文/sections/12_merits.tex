@@ -1,0 +1,115 @@
+\section{模型优缺点与取舍论证}
+
+\subsection{优点与缺点}
+
+本文方法的长处在于\textbf{离散格式与验证体系}：单向耦合洞察与双向耦合求解分开处理；
+渐变网格 $N=200/\gamma=1.5$ 以约一半计算量取得优于均匀 $N=640$ 的精度；
+L-稳定的 Backward Euler 规避显式稳定性上限 $0.37$ s；Picard 迭代保持 M-矩阵性质、
+$C$ 的正性由构造保证；中心半控制体规避 $1/r$ 奇点，界面用调和平均
+（$D$ 跨 7 个数量级时算术平均会高估通量）；入口检查 6 项明确 $C$ vs $Y$、
+$\rho$ 定义、$T$ 单位与外推方式；五类检验齐备；材料坐标处理收缩时
+$\dot R$ 对流项可证为零、两项 $R$ 幂次不可合并；A/B/C 顺序差分把物性与几何效应分开报告。
+
+不足在于\textbf{数据与维度限制}：表面列在极早期欠分辨（$t=1$ s 处
+$\Delta C=2.0\times10^{-4}$）；M0 不含蒸发潜热；一维轴对称简化，端面未做全面 CFD；
+附件1 只覆盖 0--4 h，问题2/3 需外推；$\rho$ 为湿物料体积密度，
+$\rho_d=\rho/(1+C)$ 与干物质守恒不兼容；时间收敛阶受参照解自身误差污染
+（拟合 $+1.29\sim+1.43$），故只声称不低于一阶；$\rho_d$ 不确定，
+$D$ 分位区间只传播 $D$ 一维；问题2 全程版按 60 s 采样；
+缺少内部位移、水活度关系、目标成分动力学与应变/本构/强度参数；
+3 个删数据样本需放宽步长下限才能解出（已如实报告，见 \S\ref{sec:robust}）。
+
+
+
+\begin{enumerate}[leftmargin=2.2em, itemsep=2pt]
+  \item \textbf{表面列在极早期欠分辨}：$t=1$ s 处 $\Delta C=2.0\times10^{-4}$；
+  \item \textbf{M0 不含蒸发潜热}：表面温度系统性偏高；
+  \item \textbf{一维轴对称简化}：端面方向尺度比 $39.06$，未做全面 CFD；
+  \item \textbf{附件1 只覆盖 0--4 h}：问题2/3 需外推；
+  \item \textbf{$\rho$ 为湿物料体积密度}：$\rho_d=\rho/(1+C)$
+        与干物质守恒不兼容（见 \S\ref{sec:geo-density}）；
+  \item \textbf{时间收敛阶的参照污染}：拟合 $+1.29\sim+1.43$（理论 $+1$）；
+  \item \textbf{$\rho_d$ 不确定}：附录3 的 $\rho(C)/(1+C)$ 在 $275\sim650$ 间变化；
+  \item \textbf{$D$ 分位区间只传播 $D$ 一维}：不是总不确定度；
+  \item \textbf{问题2 全程版按 60 s 采样}：题面要求``每隔 1 s''；
+  \item \textbf{未完成生产网格 vs 细参考网格的逐点对比}：参照网格超出机时预算；
+  \item \textbf{缺少内部位移数据}：附件2 只给整体半径，
+        无法识别内部位移是否仿射；
+  \item \textbf{缺少水活度关系}：题目未给吸附等温线，无法做严格的气固转换；
+  \item \textbf{缺少目标成分动力学、应变/本构/强度参数}；
+  \item \textbf{3 个删数据样本需放宽步长下限}才能解出
+        （见 \S\ref{sec:robust}，已如实报告）。
+\end{enumerate}
+
+\subsection{被省略因素的判据化取舍}
+\label{sec:omitted}
+
+本文识别出 \textbf{13 条}文献中提及、但未进入四问答案的因素。
+\textbf{任何一条被排除，都归属且仅归属于三类判据之一}，
+这一框架杜绝了``文献有但我没做''式的无判据省略：
+
+\begin{table}[H]
+  \centering
+  \caption{三类判据（互斥且穷尽）}
+  \label{tab:criteria}
+  \footnotesize
+  \begin{tabular}{@{}clc@{}}
+    \toprule
+    判据 & 含义 & 条数 \\
+    \midrule
+    \textbf{A 量级判据} & 该效应在本工况下小于判据所能分辨的尺度 & 3 \\
+    \textbf{B 数据判据} & 题面\textbf{未给}该效应必需的参数，引入即等于编造参数 & 7 \\
+    \textbf{C 重复计算判据} & 题给公式\textbf{已经隐含}了该效应 & 3 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{13 条因素的归属}
+  \label{tab:13}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{@{}clX@{}}
+    \toprule
+    判据 & 条数 & 因素 \\
+    \midrule
+    B 数据缺失 & 7
+      & 蒸气渗流、辐射、结合水、干裂、各向异性、批次差异，
+        以及 $\rho_d$ 的取值 \\
+    A 量级/口径 & 3
+      & Soret 效应（占费克通量 $0.3\sim1.1\%$）、
+        控温波动（衰减 $>99\%$）、端面（最大值口径下 $<10^{-5}$） \\
+    C 重复计算 & 3
+      & 结壳、玻璃化（附录3 的 $e^{-0.45/C}$ \textbf{已含 16.8 倍衰减}）、
+        双向耦合（\textbf{实测边界已含耦合}） \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+其中\textbf{因素``双向耦合''值得单独说明}：文献指出解耦会带来 $22\%\sim35\%$ 偏差，
+但\textbf{本文直接采用附件1 实测的烘房温湿度}，
+物料蒸发对烘房的反作用\textbf{已经在数据里}——
+所以不是``忽略''，而是``自然消解''。
+
+\textbf{三个已经建模并量化、但同样不进入答案的因素}，
+其排除理由\textbf{各不相同}，必须分开写清楚：
+
+\begin{table}[H]
+  \centering
+  \caption{三个已建模因素的处置与理由}
+  \label{tab:3factors}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{@{}lccX@{}}
+    \toprule
+    因素 & 进入答案 & 实测影响 & 为何这样处理 \\
+    \midrule
+    \textbf{蒸发潜热} & 否 & $\tstar$ $+2.84$ h（$+4.9\%$）
+      & 题面未给 $\lambda$，且修正量正比于题面未定的 $\rho_d$ \\
+    \textbf{端面效应} & 否 & 对 $\tstar$ $<10^{-5}$；
+        对体积平均 $-2.2\%\sim-6.2\%$
+      & 判据是全域最大值，端面影响不到几何中心 \\
+    \textbf{结壳/玻璃化} & 否 & $\tstar$ $+42\%\sim+970\%$
+      & 附录3 的 $D(C,T)$ 已含低含水率衰减，再乘会重复计算 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}

@@ -1,0 +1,336 @@
+\section{问题4：考虑尺寸变化}
+
+\subsection{模型建立}
+
+问题1--3 中半径固定 $R_0=2$ cm，计算域是 $[0,R_0]$。
+问题4 中半径随时间缩小，$R(t)$ 从 $2.000$ cm 降到 $1.198$ cm，
+计算域 $[0,R(t)]$ 随时间变化。引入\textbf{归一化坐标}
+\begin{equation}
+  \xi=\frac{r}{R(t)},\qquad \xi\in[0,1],
+\end{equation}
+使计算域固定在 $[0,1]$，网格不动，边界固定在 $\xi=0$ 与 $\xi=1$。
+
+\textbf{均匀径向仿射收缩假设}：附件2 只给整体半径 $R(t)$，无内部位移数据。
+因此假设内部各点按比例均匀收缩，即材料径向速度
+\begin{equation}
+  v_r=\frac{\dot R}{R}\,r .
+\end{equation}
+
+\begin{quote}
+  \textbf{必须声明}：这是\textbf{假设}，不是由数据验证的结论。
+  单个表面半径不能识别内部位移是否仿射。
+\end{quote}
+
+在均匀仿射收缩假设下，水分与温度方程变为（\textbf{材料导数形式，对流项被消去}）：
+\begin{equation}
+  \frac{\partial\widetilde C}{\partial t}
+  =\frac{1}{R(t)^{2}\xi}\frac{\partial}{\partial\xi}
+   \!\left(\xi D\frac{\partial\widetilde C}{\partial\xi}\right),
+  \qquad
+  \left(\rho c_p\right)\frac{\partial\widetilde T}{\partial t}
+  =\frac{1}{R(t)^{2}\xi}\frac{\partial}{\partial\xi}
+   \!\left(\xi k\frac{\partial\widetilde T}{\partial\xi}\right),
+\end{equation}
+其中 $\widetilde C(\xi,t)=C(\xi R(t),t)$、$\widetilde T(\xi,t)=T(\xi R(t),t)$。
+
+\begin{quote}
+  \textbf{两点必须强调}：
+  \begin{enumerate}[leftmargin=1.6em, itemsep=2pt]
+    \item 因为材料随网格均匀收缩，\textbf{对流项被严格消去}——
+          这一步是\textbf{可证的，不是近似}，$\dot R$ 不出现在方程里；
+    \item 扩散项 $\propto1/R^{2}$、表面项 $\propto1/R$，\textbf{二者不可合并}。
+  \end{enumerate}
+\end{quote}
+
+\textbf{边界条件}：
+\begin{equation}
+  \xi=0:\quad \frac{\partial\widetilde C}{\partial\xi}
+  =\frac{\partial\widetilde T}{\partial\xi}=0;
+\end{equation}
+\begin{equation}
+  \xi=1:\quad
+  -\frac{D}{R}\frac{\partial\widetilde C}{\partial\xi}
+  =h_m\left(\widetilde C_s-\Cinf\right),\qquad
+  -\frac{k}{R}\frac{\partial\widetilde T}{\partial\xi}
+  =h\left(\widetilde T_s-T_\infty\right).
+\end{equation}
+注意表面边界带 $1/R$ 因子，这是坐标变换的结果。
+
+\textbf{物性采用附录4}：
+\begin{equation}
+  \rho=760+90C,\quad
+  c_p=1850+2150\frac{C}{1+C},\quad
+  k=0.12+0.20\frac{C}{1+C},
+\end{equation}
+\begin{equation}
+  D=4.2\times10^{-4}\exp\!\left(-\frac{0.30}{C}\right)
+    \exp\!\left(-\frac{3850}{T_K}\right),\qquad T_K=T+273.15 .
+\end{equation}
+
+\textbf{初始条件}：$T(\xi,0)=28\ ^\circ\mathrm{C}$，
+$C(\xi,0)=2.55$ kg/kg。半径函数 $R(t)$ 由附件2 的 PCHIP 插值给出。
+
+\subsection{数值方法}
+
+\begin{table}[H]
+  \centering
+  \caption{问题4 计算设置}
+  \label{tab:p4num}
+  \footnotesize
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    项 & 值 \\
+    \midrule
+    空间网格 & 节点式 $\xi$ 网格 $N=200$、$\gamma=1.5$（向表面加密），
+               $\Delta\xi=3.56\times10^{-4}\sim7.53\times10^{-3}$ \\
+    时间步长 & $\boldsymbol{\Delta t=\mathbf{1}}$ \textbf{s}（收敛口径） \\
+    时间格式 & $\theta=1$（Backward Euler，L-稳定）$+$ 块 Gauss--Seidel Picard \\
+    判据 & $\Cmax(t)=\max_\xi C<0.15$ kg/kg（未舍入判定） \\
+    求解器 & Thomas 三对角，与 MATLAB 内置求解器差 $1.77\times10^{-15}$（机器精度） \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\textbf{关于时间步长的口径}：问题4 的时间离散在 $\Delta t=30$ s 时\textbf{远未收敛}，
+必须单独钉住。用固定探测时刻法（积分到 184200 s，量 $\Cmax$ 再由局部斜率换算）：
+
+\begin{table}[H]
+  \centering
+  \caption{问题4 的时间收敛}
+  \label{tab:p4time}
+  \footnotesize
+  \begin{tabular}{@{}lccc@{}}
+    \toprule
+    $\Delta t_{\max}$ / s & $\Cmax(184200\ \mathrm{s})$ & $\tdry$ / h & 相对 $\Delta t=1$ s \\
+    \midrule
+    30 & 0.14989439 & 51.1096 & $+0.0191$ h \\
+    10 & 0.14987011 & 51.0964 & $+0.0059$ h \\
+    3  & 0.14986161 & 51.0918 & $+0.0013$ h \\
+    \textbf{1} & \textbf{0.14985918} & $\mathbf{51.0905}$ & --- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+$\Delta t=3$ 与 $\Delta t=1$ 只差 $4.7$ s，已收敛。
+本文以 $\Delta t=1$ s 作为论文口径。
+
+\subsection{结果}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\textwidth]{G7_p4_moving_boundary.png}
+  \caption{问题4 物理坐标下的含水率演化与移动边界轨迹}
+  \label{fig:G7}
+\end{figure}
+
+\textbf{主结果}（$\Delta t=1$ s 收敛口径）：
+
+\begin{table}[H]
+  \centering
+  \caption{问题4 主结果}
+  \label{tab:p4main}
+  \footnotesize
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    项 & 值 \\
+    \midrule
+    烘干所需时间 $\tdry$ & $183926$ s $=\mathbf{51.0906}$ \textbf{h} $=2.1288$ 天 \\
+    转化参考（探测法） & $51.0905$ h，与上差 $0.18$ s（互为独立核对） \\
+    终态半径 & $1.2000$ cm（附件2 末值 $1.1980$ cm） \\
+    终态 $\Cmax$ & $0.14999962$ kg/kg（未舍入） \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\input{tables/tab6}
+
+完整结果见 \texttt{result4.xlsx}。注意该文件的距离轴只到 $1.9$ cm、
+\textbf{末列是字符串``药材表面''}，域外位置\textbf{留空}（不填 0），
+以符合附件3 模板规格。
+
+\subsubsection*{两套独立实现的交叉验证}
+
+问题4 由两套\textbf{互相独立}的实现求解，用于交叉验证：
+
+\begin{table}[H]
+  \centering
+  \caption{问题4 的两套独立实现}
+  \label{tab:twoimpl}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{@{}llXc@{}}
+    \toprule
+    实现 & 语言 & 计算设置 & $\tdry$ \\
+    \midrule
+    I & MATLAB & 节点式 $\xi$ 网格 $N=160$（均匀）、$\Delta t=10$ s、
+      环境 1800 s 硬切 & $51.20$ h \\
+    II & Python（本文） & $N=200$、$\gamma=1.5$、$\Delta t=1$ s、
+      附件1 全程 PCHIP $+$ 平台外推 & $\mathbf{51.0906}$ h \\
+    \midrule
+    \multicolumn{3}{@{}l}{两者之差} & $0.11$ h（$0.2\%$） \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+两套实现在\textbf{语文、网格约定、时间格式、环境处理}上全部不同，
+却给出相差 $0.2\%$ 的同一结果，且方向一致——这构成问题4 结论的
+\textbf{跨实现交叉验证}。
+
+\begin{quote}
+  \textbf{为什么要固定网格再比}：实现 I 在\textbf{其原始网格}（$N=20$）上给出的是
+  $73.03$ h，看上去与实现 II 相差 $43\%$。但这是\textbf{离散误差}而非模型分歧——
+  同一套代码把网格加密到 $N=160$ 即降到 $51.20$ h（$N=40\to54.68$、
+  $N=80\to51.73$），已进入收敛区。
+  同时，把时间步长从 $20$ s 缩到 $1$ s，$N=20$ 下的结果仅在
+  $73.0389\to73.0244$ h 之间变动——\textbf{变化不到 $0.02\%$}，
+  说明该偏差\textbf{完全由空间分辨率决定，与时间步长无关}。
+  故交叉验证必须\textbf{在两侧都收敛之后}进行，否则比的是离散误差而不是模型。
+\end{quote}
+
+\subsection{分析与讨论}
+
+\subsubsection*{（1）收缩显著加速干燥}
+
+若\textbf{忽略收缩}（固定半径 $R_0=2$ cm、仍保留附录4 物性），
+则 $t>120$ h 仍未达标（$120$ h 时 $\Cmax=0.1571$）。
+即\textbf{半径收缩把烘干时间从 $>120$ h 缩短到 $51.09$ h}，
+因为扩散路径缩短，减小了内部水分迁移的阻力。
+
+\subsubsection*{（2）A/B/C 顺序差分}
+\label{sec:abc}
+
+为分离物性公式与几何收缩的影响，按 A$\to$B$\to$C 路径做顺序差分：
+
+\begin{table}[H]
+  \centering
+  \caption{A$\to$B$\to$C 顺序差分结果}
+  \label{tab:abc}
+  \footnotesize
+  \begin{tabular}{@{}clccc@{}}
+    \toprule
+    版本 & 尺寸 & 物性 & $\tdry$ & 对应问题 \\
+    \midrule
+    A & 固定 2 cm & 附录3 & $57.49$ h & 问题3（M0） \\
+    B & 固定 2 cm & 附录4 & $>120$ h（$120$ h 时 $\Cmax=0.1571$） & 中间版本 \\
+    C & 随时间收缩 & 附录4 & $\mathbf{51.09}$ h & 问题4 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{itemize}[leftmargin=1.6em, itemsep=2pt]
+  \item \textbf{A vs B}：物性从附录3 换成附录4，$\tdry$ 从 $57.49$ h 增加到
+        $>120$ h（$\ge+62.51$ h），说明附录4 的物性让干燥\textbf{显著变慢}；
+  \item \textbf{B vs C}：尺寸从固定变成收缩，$\tdry$ 从 $>120$ h 减少到 $51.09$ h
+        （$\le-68.91$ h），说明收缩\textbf{显著加速}干燥；
+  \item \textbf{A vs C}：总效果——$\tdry$ 从 $57.49$ h 变成 $51.09$ h，
+        \textbf{净减少 $6.40$ h}。即在本参数组合下，
+        \textbf{收缩的加速效应（$\ge68.91$ h）大于物性变化的减速效应（$\ge62.51$ h），
+        净效果是干燥加快。}
+\end{itemize}
+
+\begin{quote}
+  称为\textbf{「按 A$\to$B$\to$C 路径的顺序差分」}；
+  \textbf{不称为``唯一、独立的因果贡献分解''}。
+  三者必须在\textbf{同一网格、同一时间步、同一判据}下比较，
+  差出来的才是物性与几何的贡献。
+\end{quote}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.60\textwidth]{G9_abc.png}
+  \caption{A/B/C 顺序差分：三版本 $\tdry$ 对比}
+  \label{fig:G9}
+\end{figure}
+
+\subsubsection*{（3）半径外推敏感性——本文不需要外推}
+
+$\tdry=51.09$ h 落在附件2 的覆盖范围（$0\sim72$ h）\textbf{之内}，
+故 $R(t)$ 全程为\textbf{插值}而非外推，外推方式对本文结果\textbf{没有影响}。
+独立复核中实测：把半径改为``钳在末值''或``线性外推''，
+$\tdry$ 的差值为 $\mathbf{0.000}$ h。
+
+\subsubsection*{（4）几何—密度一致性诊断}
+\label{sec:geo-density}
+
+采用均匀仿射收缩假设，定义干固体密度
+\begin{equation}
+  \rho_d(C)=\frac{\rho(C)}{1+C}=\frac{760+90C}{1+C},
+\end{equation}
+诊断量
+\begin{equation}
+  M_d^{\mathrm{diag}}(t)=2\pi L\int_0^{R(t)}\frac{\rho(C)}{1+C}\,r\,\mathrm dr,
+  \qquad
+  e_d(t)=\frac{M_d^{\mathrm{diag}}(t)-M_d^{\mathrm{diag}}(0)}{M_d^{\mathrm{diag}}(0)} .
+\end{equation}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\textwidth]{G11_geo_density.png}
+  \caption{几何—密度一致性诊断（条件性，不下``数据有误''的结论）}
+  \label{fig:G11}
+\end{figure}
+
+\textbf{诊断结果}：$e_d$ 在 $\mathbf{-0.28}\sim\mathbf{-0.11}$ 之间波动，
+整体偏离 0。
+
+\textbf{条件性下界}：对 $C\ge0$，$\rho_d(C)\le760$。
+若长度固定、无干物质损失，则
+\begin{equation}
+  R_f\ \ge\ R_0\sqrt{\rho_{d,0}/760}
+  =2.0\times\sqrt{278.7324/760}\approx\mathbf{1.2112}\ \mathrm{cm}.
+\end{equation}
+实测终态半径 $R_f=1.2000$ cm，\textbf{略小于该下界，差额约 $0.0112$ cm}。
+
+\begin{quote}
+  本项为\textbf{条件性诊断}，不是基础有效扩散模型天然必须通过的严格质量守恒测试。
+  诊断结果显示 $e_d$ 偏离 0，\textbf{提示密度定义、数据误差、几何假设或干物质守恒
+  的联合使用需要核查}。若 $\rho$ 只是热学等效参数，则不应强行用于严格干质量检验。
+
+  \textbf{本项不下``数据有误''或``假设已验证''的结论，
+  也不为通过诊断而调整题设参数。}
+\end{quote}
+
+\subsubsection*{（5）端面效应与结壳——即使不改变答案也必须说明}
+\label{sec:endface}
+\label{sec:crust}
+
+这两个因素对本文问题4 的答案\textbf{没有影响}，但作用必须写清楚，
+以免读者误以为``答案里含了这些不确定性''。
+
+\textbf{端面效应}：药材长径比 $6.25$，端面面积是侧面积的 $8\%$。
+本文建立\textbf{二维轴对称有限圆柱}模型（计算域取半长）与一维径向模型对照，
+并以``端面绝热时必须退化为一维''作为内建回归
+（通过：沿 $z$ 不均匀度 $10^{-15}$，与一维最大差 $1.4\times10^{-3}$，判据 $2\times10^{-3}$）。
+
+\begin{table}[H]
+  \centering
+  \caption{端面效应的两种口径}
+  \label{tab:endface}
+  \footnotesize
+  \begin{tabular}{@{}lcc@{}}
+    \toprule
+    时刻 & $\Cmax$ 之差（决定 $\tstar$） & 体积平均 $C$ 的相对差 \\
+    \midrule
+    10 h & $-8.2\times10^{-6}$ & $-6.21\%$ \\
+    30 h & $-4.5\times10^{-6}$ & $-2.96\%$ \\
+    57.5 h（$\approx\tstar$） & $-2.9\times10^{-6}$ & $-2.20\%$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\textbf{结论}：对本文采用的\textbf{全域最大含水率}判据，端面效应 $<10^{-5}$，
+\textbf{可忽略}（$\Cmax$ 出现在几何中心，距两端面各 $12.5$ cm、
+距侧面仅 $2$ cm，端面几乎影响不到它）；
+但对\textbf{体积平均含水率}，端面效应为 $-2.2\%\sim-6.2\%$，
+与文献报道的 $3.5\%\sim6.0\%$ \textbf{同口径吻合}。
+\textbf{这一对比说明：任何``可忽略/不可忽略''的判断都必须绑定判据口径。}
+
+\textbf{结壳与玻璃化}：表面先干 $\to$ 表层进入玻璃态、形成低渗透硬壳 $\to$
+锁住内部水分 $\to$ 干燥末期变慢。本文以壳层扩散系数降幅 $\beta_c$ 与
+临界含水率 $C_g$ 作参数化扫描，$\tstar$ 增幅从 $+42\%$（$C_g=0.15$）
+到 $+970\%$（$C_g=0.50$）。
+
+\textbf{为何不计入基线}：附录3 的 $D(C,T)$ \textbf{已编码低含水率段的强烈衰减}
+——$\exp(-0.45/C)$ 在 $C=2.55$ 时为 $0.838$、在 $C=0.15$ 时为 $0.0498$，
+\textbf{公式本身已含 16.8 倍降幅}；再乘 $\beta_c$ 属\textbf{重复计算同一物理效应}。
+且文献未给出中药材的壳层扩散系数比，题面也未给壳层数据。
+故本文不将其计入基线，仅作扩展讨论。

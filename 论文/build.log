@@ -1,0 +1,253 @@
+This is XeTeX, Version 3.141592653-2.6-0.999998 (TeX Live 2026) (preloaded format=xelatex)
+ restricted \write18 enabled.
+entering extended mode
+(./main.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2026-01-19>
+(d:/texlive/2026/texmf-dist/tex/latex/ctex/ctexart.cls
+(d:/texlive/2026/texmf-dist/tex/latex/ctex/config/ctexbackend.cfg)
+(d:/texlive/2026/texmf-dist/tex/latex/l3kernel/expl3.sty
+(d:/texlive/2026/texmf-dist/tex/latex/l3backend/l3backend-xetex.def))
+Document Class: ctexart 2022/07/14 v2.5.10 Chinese adapter for class article (C
+TEX)
+(d:/texlive/2026/texmf-dist/tex/latex/ctex/ctexhook.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/ctex/ctexpatch.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/base/fix-cm.sty
+(d:/texlive/2026/texmf-dist/tex/latex/base/ts1enc.def))
+(d:/texlive/2026/texmf-dist/tex/latex/ctex/config/ctexopts.cfg)
+(d:/texlive/2026/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
+(d:/texlive/2026/texmf-dist/tex/latex/base/size11.clo))
+(d:/texlive/2026/texmf-dist/tex/latex/ctex/engine/ctex-engine-xetex.def
+(d:/texlive/2026/texmf-dist/tex/xelatex/xecjk/xeCJK.sty
+(d:/texlive/2026/texmf-dist/tex/latex/l3packages/xtemplate/xtemplate.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/fontspec/fontspec.sty
+(d:/texlive/2026/texmf-dist/tex/latex/l3packages/xparse/xparse.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/fontspec/fontspec-xetex.sty
+(d:/texlive/2026/texmf-dist/tex/latex/base/fontenc.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/fontspec/fontspec.cfg)))
+(d:/texlive/2026/texmf-dist/tex/xelatex/xecjk/xeCJK.cfg)))
+(d:/texlive/2026/texmf-dist/tex/latex/zhnumber/zhnumber.sty
+(d:/texlive/2026/texmf-dist/tex/latex/zhnumber/zhnumber-utf8.cfg))
+(d:/texlive/2026/texmf-dist/tex/latex/ctex/scheme/ctex-scheme-chinese-article.d
+ef (d:/texlive/2026/texmf-dist/tex/latex/ctex/config/ctex-name-utf8.cfg))
+(d:/texlive/2026/texmf-dist/tex/latex/ctex/fontset/ctex-fontset-windows.def))
+(d:/texlive/2026/texmf-dist/tex/latex/ctex/config/ctex.cfg)
+(d:/texlive/2026/texmf-dist/tex/latex/geometry/geometry.sty
+(d:/texlive/2026/texmf-dist/tex/latex/graphics/keyval.sty)
+(d:/texlive/2026/texmf-dist/tex/generic/iftex/ifvtex.sty
+(d:/texlive/2026/texmf-dist/tex/generic/iftex/iftex.sty)))
+(d:/texlive/2026/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/titlesec/titlesec.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(d:/texlive/2026/texmf-dist/tex/latex/amsmath/amstext.sty
+(d:/texlive/2026/texmf-dist/tex/latex/amsmath/amsgen.sty))
+(d:/texlive/2026/texmf-dist/tex/latex/amsmath/amsbsy.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/amsmath/amsopn.sty))
+(d:/texlive/2026/texmf-dist/tex/latex/amsfonts/amssymb.sty
+(d:/texlive/2026/texmf-dist/tex/latex/amsfonts/amsfonts.sty))
+(d:/texlive/2026/texmf-dist/tex/latex/mathtools/mathtools.sty
+(d:/texlive/2026/texmf-dist/tex/latex/tools/calc.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/mathtools/mhsetup.sty))
+(d:/texlive/2026/texmf-dist/tex/latex/tools/bm.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/booktabs/booktabs.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/multirow/multirow.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/tools/array.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/tools/tabularx.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/tools/longtable.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/makecell/makecell.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/graphics/graphicx.sty
+(d:/texlive/2026/texmf-dist/tex/latex/graphics/graphics.sty
+(d:/texlive/2026/texmf-dist/tex/latex/graphics/trig.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)
+(d:/texlive/2026/texmf-dist/tex/latex/graphics-def/xetex.def)))
+(d:/texlive/2026/texmf-dist/tex/latex/caption/subcaption.sty
+(d:/texlive/2026/texmf-dist/tex/latex/caption/caption.sty
+(d:/texlive/2026/texmf-dist/tex/latex/caption/caption3.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/caption/ltcaption.sty)))
+(d:/texlive/2026/texmf-dist/tex/latex/float/float.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/listings/listings.sty
+(d:/texlive/2026/texmf-dist/tex/latex/listings/lstpatch.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/listings/lstmisc.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/listings/listings.cfg))
+(d:/texlive/2026/texmf-dist/tex/xelatex/xecjk/xeCJK-listings.sty)
+==> First Aid for listings.sty no longer applied!
+    Expected:
+        2024/09/23 1.10c (Carsten Heinz)
+    but found:
+        2025/11/14 1.11b (Carsten Heinz)
+    so I'm assuming it got fixed.
+(d:/texlive/2026/texmf-dist/tex/latex/xcolor/xcolor.sty
+(d:/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(d:/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx))
+(d:/texlive/2026/texmf-dist/tex/latex/hyperref/hyperref.sty
+(d:/texlive/2026/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty)
+(d:/texlive/2026/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(d:/texlive/2026/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+(d:/texlive/2026/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(d:/texlive/2026/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(d:/texlive/2026/texmf-dist/tex/generic/infwarerr/infwarerr.sty)))
+(d:/texlive/2026/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/hyperref/nameref.sty
+(d:/texlive/2026/texmf-dist/tex/latex/refcount/refcount.sty)
+(d:/texlive/2026/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+(d:/texlive/2026/texmf-dist/tex/latex/kvoptions/kvoptions.sty)))
+(d:/texlive/2026/texmf-dist/tex/latex/etoolbox/etoolbox.sty)
+(d:/texlive/2026/texmf-dist/tex/generic/stringenc/stringenc.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(d:/texlive/2026/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/hyperref/puenc.def)
+(d:/texlive/2026/texmf-dist/tex/latex/url/url.sty)
+(d:/texlive/2026/texmf-dist/tex/generic/bitset/bitset.sty
+(d:/texlive/2026/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty)))
+(d:/texlive/2026/texmf-dist/tex/latex/hyperref/hxetex.def
+(d:/texlive/2026/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(d:/texlive/2026/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty)))
+(d:/texlive/2026/texmf-dist/tex/latex/enumitem/enumitem.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/siunitx/siunitx.sty
+(d:/texlive/2026/texmf-dist/tex/latex/translations/translations.sty))
+(d:/texlive/2026/texmf-dist/tex/latex/algorithm2e/algorithm2e.sty
+(d:/texlive/2026/texmf-dist/tex/latex/base/ifthen.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/ifoddpage/ifoddpage.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/tools/xspace.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/relsize/relsize.sty)) (./main.aux
+
+LaTeX Warning: Label `sec:refnote' multiply defined.
+
+)
+*geometry* driver: auto-detecting
+*geometry* detected driver: xetex
+(./main.out) (./main.out)
+(d:/texlive/2026/texmf-dist/tex/latex/translations/translations-basic-dictionar
+y-english.trsl) (./sections/00_abstract.tex
+(d:/texlive/2026/texmf-dist/tex/latex/amsfonts/umsa.fd)
+(d:/texlive/2026/texmf-dist/tex/latex/amsfonts/umsb.fd)) [1]
+(./sections/01_restate.tex) (./sections/02_analysis.tex [2] [3])
+(./sections/03_assume.tex) (./sections/04_symbols.tex [4])
+(./sections/05_data.tex [5] [6]) (./sections/06_problem1.tex [7] [8]
+(./tables/tab1.tex) (./tables/tab2.tex) [9]) (./sections/07_problem2.tex
+[10] [11] (./tables/tab3.tex) (./tables/tab4.tex) [12]
+Overfull \hbox (1.42639pt too wide) in paragraph at lines 127--131
+[]\TU/SimSun(0)/b/n/10.95 差 异 方 向 值 得 注 意\TU/SimSun(0)/m/n/10.95 ：|  表 面 上 附 录 
+\TU/lmr/m/n/10.95 3 \TU/SimSun(0)/m/n/10.95 的 $\OML/cmm/m/it/10.95 D$ \TU/SimSu
+n(0)/m/n/10.95 在 $\OT1/cmr/m/n/10.95 30 [][]$ \TU/SimSun(0)/m/n/10.95 附 近 反 而 略
+ 大 于 附 录 \TU/lmr/m/n/10.95 2 |\TU/SimSun(0)/m/n/10.95 （$\OML/cmm/m/it/10.95 D[]
+\OT1/cmr/m/n/10.95 (2\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 55\OML/cmm/m/it/10
+.95 ; \OT1/cmr/m/n/10.95 30 [][]) =
+) (./sections/08_problem3.tex [13] (./tables/tab5.tex) [14] [15])
+(./sections/09_problem4.tex [16] [17] (./tables/tab6.tex) [18] [19] [20])
+(./sections/10_checks.tex
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 7.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `superscript' on input line 7.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 7.
+
+[21] [22]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 127.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `subscript' on input line 127.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 127.
+
+[23] [24]
+Overfull \hbox (3.79718pt too wide) in paragraph at lines 345--356
+ [][] 
+Missing character: There is no ① (U+2460) in font [lmroman10-bold]:mapping=tex-
+text;!
+Missing character: There is no ② (U+2461) in font [lmroman10-bold]:mapping=tex-
+text;!
+Missing character: There is no ③ (U+2462) in font [lmroman10-bold]:mapping=tex-
+text;!
+Missing character: There is no ★ (U+2605) in font [lmroman10-bold]:mapping=tex-
+text;!
+[25]) (./sections/11_improve.tex
+Overfull \hbox (3.74794pt too wide) in paragraph at lines 11--15
+\TU/SimSun(0)/m/n/10.95 其 中 $\OML/cmm/m/it/10.95 J[]$ \TU/SimSun(0)/m/n/10.95 的
+ 单 位 是 \TU/lmr/m/n/10.95 kg/(m$[]\OMS/cmsy/m/n/10.95 ^^A$\TU/lmr/m/n/10.95 s)\T
+U/SimSun(0)/m/n/10.95 ，|  \TU/SimSun(0)/b/n/10.95 不 得 \TU/SimSun(0)/m/n/10.95 把
+ $\OML/cmm/m/it/10.95 h[]\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 C[] \OMS/cmsy/
+m/n/10.95 ^^@ \OML/cmm/m/it/10.95 C[]\OT1/cmr/m/n/10.95 )$ \TU/SimSun(0)/m/n/10
+.95 直 接 乘 潜 热 当 热 通 量  |— —|  它 的 单 位 是 \TU/lmr/m/n/10.95 kg/(kg$\OMS/cmsy/m/n/
+10.95 ^^A$\TU/lmr/m/n/10.95 s)\TU/SimSun(0)/m/n/10.95 ，|
+[26] [27]) (./sections/12_merits.tex [28]) (./sections/13_conclusion.tex
+[29]) (./sections/14_ai_decl.tex [30]) (./sections/15_refs.tex
+Underfull \hbox (badness 1297) in paragraph at lines 14--18
+[]\TU/lmr/m/n/10 Kumar, C., Millar, G. J., & Karim, M. A. (2015). \TU/lmr/m/it/
+10 Effective diffusivity and evaporative
+
+Underfull \hbox (badness 1817) in paragraph at lines 14--18
+\TU/lmr/m/it/10 cooling in convective drying of food material. \TU/lmr/m/n/10 D
+rying Technology, \TU/lmr/bx/n/10 33\TU/lmr/m/n/10 (2), 227–237. DOI:
+
+Underfull \hbox (badness 2970) in paragraph at lines 36--40
+[]\TU/lmr/m/n/10 Häussling Löwgren, B., Bergmann, J., & Alves-Filho, O. (2020).
+ \TU/lmr/m/it/10 A numerical imple-
+
+Underfull \hbox (badness 4229) in paragraph at lines 36--40
+\TU/lmr/m/it/10 mentation of the Soret effect in drying processes. \TU/lmr/m/n/
+10 ChemEngineering, \TU/lmr/bx/n/10 4\TU/lmr/m/n/10 (1), 13. DOI:
+[31]
+Underfull \hbox (badness 3199) in paragraph at lines 73--77
+[]\TU/lmr/m/n/10 Ceylan, İ., Aktaş, M., & Doğan, H. (2007). \TU/lmr/m/it/10 Mat
+hematical modeling of drying char-
+
+Underfull \hbox (badness 2726) in paragraph at lines 73--77
+\TU/lmr/m/it/10 acteristics of tropical fruits. \TU/lmr/m/n/10 Applied Thermal 
+Engineering, \TU/lmr/bx/n/10 27\TU/lmr/m/n/10 (11–12), 1931–1936. DOI:
+
+Underfull \hbox (badness 6348) in paragraph at lines 84--88
+[]\TU/lmr/m/n/10 Curcio, S., & Aversa, M. (2014). \TU/lmr/m/it/10 Influence of 
+shrinkage on convective drying of
+
+Underfull \hbox (badness 2343) in paragraph at lines 84--88
+\TU/lmr/m/it/10 fresh vegetables: A theoretical model. \TU/lmr/m/n/10 Journal o
+f Food Engineering, \TU/lmr/bx/n/10 123\TU/lmr/m/n/10 , 36–49. DOI:
+) (./sections/16_appendix.tex [32]
+(d:/texlive/2026/texmf-dist/tex/latex/listings/lstlang1.sty)
+(d:/texlive/2026/texmf-dist/tex/latex/listings/lstlang1.sty)
+
+LaTeX Font Warning: Font shape `TU/FangSong(0)/m/it' undefined
+(Font)              using `TU/FangSong(0)/m/n' instead on input line 69.
+
+[33] [34]
+Missing character: There is no ① (U+2460) in font [lmmono10-regular]:!
+Missing character: There is no ② (U+2461) in font [lmmono10-regular]:!
+
+LaTeX Font Warning: Font shape `TU/FangSong(0)/b/n' undefined
+(Font)              using `TU/FangSong(0)/m/n' instead on input line 216.
+
+Missing character: There is no ③ (U+2462) in font [lmmono10-regular]:!
+
+LaTeX Font Warning: Font shape `TU/SimSun(0)/b/it' undefined
+(Font)              using `TU/SimSun(0)/b/n' instead on input line 216.
+
+[35] [36]
+Missing character: There is no ① (U+2460) in font [lmmono10-regular]:!
+Missing character: There is no ② (U+2461) in font [lmmono10-regular]:!
+[37]
+Missing character: There is no ★ (U+2605) in font [lmmono10-regular]:!
+[38] [39]) [40] (./main.aux)
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+
+LaTeX Warning: There were multiply-defined labels.
+
+ )
+(see the transcript file for additional information)
+Output written on main.pdf (40 pages).
+Transcript written on main.log.

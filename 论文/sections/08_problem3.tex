@@ -1,0 +1,178 @@
+\section{问题3：烘干时间确定}
+
+\subsection{判据定义}
+
+题面要求``药材\textbf{各处}的水分浓度应低于 $0.15$ kg/kg''，
+``各处''即\textbf{全域}。故判据必须是
+\begin{equation}
+  \Cmax(t)=\max_{r\in[0,R_0]}C(r,t),
+  \qquad
+  \tstar=\inf\{\,t:\ \Cmax(t)<0.15\,\}.
+\end{equation}
+
+本文\textbf{不默认}最大值出现在中心，而是逐时刻对全域取 $\max$ 并记录
+$\arg\max$ 的位置。实测确认 $\arg\max\equiv0$（中心），
+即``中心是最难干燥的位置''是\textbf{被验证的结论，不是前提}。
+
+\subsection{求解策略}
+
+把 $\Cmax(t)-0.15$ 作为 ODE 求解器的\textbf{终止事件}，自适应精确定位零点。
+两阶段：\textbf{粗扫}（按 60 s 输出、达标即停）$\to$
+\textbf{二分}（在锚点与上界之间二分，每次试算都从\textbf{同一个固定锚点}
+积分到试探时刻）。
+
+\begin{table}[H]
+  \centering
+  \caption{问题3 主结果}
+  \label{tab:p3main}
+  \footnotesize
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    项 & 值 \\
+    \midrule
+    阈值通过时刻 $\tstar$ & $\mathbf{206959.9521}$ s $=\mathbf{57.4889}$ h $=2.3954$ 天 \\
+    交付取整（最早整数秒） & $206960$ s（\texttt{result3.xlsx} 末行） \\
+    $\Cmax(\tstar)$ & $0.1499999998$（未舍入） \\
+    最大值位置 & $r=0$（中心），逐时刻核对 \\
+    二分次数 & 15 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\textbf{注意}：$\Cmax(\tstar)=0.15$ 而非严格小于——这正是``连续模型的阈值交点''
+的特征。本文报告的是\textbf{「阈值通过时刻」}，
+并单独验证其后一段时间内全场持续达标。
+
+\subsection{结果}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\textwidth]{G6_p3_threshold.png}
+  \caption{问题3 阈值通过时刻与终态含水率分布}
+  \label{fig:G6}
+\end{figure}
+
+\input{tables/tab5}
+
+完整结果见 \texttt{result3.xlsx}。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\textwidth]{G12_max_center_surface.png}
+  \caption{中心 / 表面 / 全域最大值 / 面积平均四条曲线——
+           判据必须用 $\Cmax$ 而非平均值或表面值}
+  \label{fig:G12}
+\end{figure}
+
+\subsection{分析与讨论}
+
+\subsubsection*{（1）最大值出现在中心，必须用 $\Cmax$ 判定}
+
+由 图 \ref{fig:G12} 可见，$\Cmax(t)$ 与中心 $C(0,t)$ \textbf{几乎重合}，
+说明中心是最难干燥的位置。题面要求``药材各处的水分浓度应低于 0.15''，
+故只有 $\Cmax$ 是合法判据。不同判据给出的达标时间：
+
+\begin{table}[H]
+  \centering
+  \caption{三种判据的达标时间对照}
+  \label{tab:criterion}
+  \footnotesize
+  \begin{tabular}{@{}lccc@{}}
+    \toprule
+    判据 & 达标时间 / h & 相对正确值的偏差 & 判定 \\
+    \midrule
+    $\Cmax(t)$ & $\mathbf{57.49}$ & --- & \textbf{正确} \\
+    面积平均 $\bar C(t)$ & 36.04 & 低估 $21.44$ h（$\mathbf{37.3\%}$） & 错误 \\
+    表面 $C(R_0,t)$ & 12.55 & 低估 $44.94$ h（$78.2\%$） & 错误 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{quote}
+  \textbf{误用平均值会把 2.4 天的工艺说成 1.5 天。}
+\end{quote}
+
+\subsubsection*{（2）持续达标核验}
+
+$\tstar$ 之后以 720 s 为间隔取 6 个探针点，$\Cmax$ 逐点核验
+（表 \ref{tab:sustain}）：全部 $<0.15$，\textbf{持续达标}。
+需要核验的理由是：若环境可能回湿，``首次达标''与``持续达标''不同。
+本工况恒温段 $\Cinf\equiv0.05<0.15$，驱动势始终为正，预期不会回湿——
+但本文\textbf{仍逐点核验，不靠预期}。
+
+\begin{table}[H]
+  \centering
+  \caption{$\tstar$ 之后的持续达标核验}
+  \label{tab:sustain}
+  \footnotesize
+  \begin{tabular}{@{}lccccc@{}}
+    \toprule
+    $t$ & $\tstar$ & $\tstar+720$ & $\tstar+1440$ & $\tstar+2160$ & $\tstar+3600$ \\
+    \midrule
+    $\Cmax$ & 0.1500000 & 0.1497910 & 0.1495835 & 0.1493772 & 0.1489688 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection*{（3）三类误差分开报告}
+
+\begin{table}[H]
+  \centering
+  \caption{$\tstar$ 的误差三分量}
+  \label{tab:err3}
+  \footnotesize
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    误差类型 & 量值 & 说明 \\
+    \midrule
+    事件定位误差 & $\pm0.0005$ s & 二分容差的一半 \\
+    \textbf{空间离散误差} & $\approx\mathbf{17.4}$ \textbf{s} & \textbf{主导项}，由 $N$ 细化给出 \\
+    时间积分误差 & 1.86 s & 一阶（Backward Euler），
+                               拟合 $+1.29\sim+1.43$，\textbf{不声称二阶} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{quote}
+  \textbf{定位到 1 s 不代表干燥时间整体准确到 1 s。}
+  事件定位误差 0.5 ms 只是``在给定离散下找零点''的精度；
+  真正的误差由空间离散与时间积分主导。
+\end{quote}
+
+\subsection{精度口径声明}
+\label{sec:tstar-precision}
+
+问题3 的答案依赖三个\textbf{必须显式声明}的口径选择。
+换一个同样合理的取法，答案会移动几十到上千秒——\textbf{不声明，答案就不可比}。
+
+\textbf{口径一：达标判据用全域最大值}（见 \S8.4.1）。
+题面``各处''决定必须是 $\Cmax$；用面积平均会低估 $37.3\%$。
+
+\textbf{口径二：恒温段环境取哪个窗口的均值}。
+附件1 只覆盖 0--14400 s，$t>14400$ s 的边界必须假定：
+
+\begin{table}[H]
+  \centering
+  \caption{环境平台窗口的取法对问题3 答案的影响}
+  \label{tab:window}
+  \footnotesize
+  \begin{tabular}{@{}lccc@{}}
+    \toprule
+    平台窗口 & $T_\infty$ / $^\circ$C & $\Cinf$ / (kg/kg) & $\tstar$ / h \\
+    \midrule
+    $t\ge9600$ s（81 点，\textbf{本文采用}） & 50.0017 & 0.049998 & $\mathbf{57.4889}$ \\
+    $t\ge12400$ s & 50.0092 & 0.049980 & 57.4747 \\
+    直接取整数 & 50.0 & 0.05 & 57.4919 \\
+    只取末点 & 50.1650 & 0.049860 & 57.1890 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\textbf{跨度 $0.30$ h（$1090$ s）}——比本文的全部离散误差（约 $19$ s）
+大 \textbf{57 倍}。故本文明确声明采用 $t\ge9600$ s 的实测均值。
+
+\textbf{口径三：$\tstar$ 报告到几位小数}。
+由表 \ref{tab:err3}，空间离散误差 $17.4$ s $\approx0.005$ h 落在第 3 位，
+故本文报告 $\tstar\approx\mathbf{57.49}$ \textbf{h}（2 位小数）。
+\textbf{题面要求四位小数的是表 5 的含水率数值，不是``烘干时间''这一时刻本身。}
+把 $57.4889$ h 写进论文会让人误以为第 4 位有效——那是\textbf{虚假精度}。

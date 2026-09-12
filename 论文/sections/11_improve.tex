@@ -1,0 +1,139 @@
+\section{模型改进与推广}
+
+\subsection{蒸发潜热对照（M1，条件性扩展）}
+\label{sec:M1}
+
+问题2/3 的 M0 基线\textbf{不含蒸发潜热}。作为对照，M1 在表面能量平衡中加入潜热项
+\begin{equation}
+  -k\frac{\partial T}{\partial r}\bigg|_{R}=h\left(T_s-T_\infty\right)+\lambda J_w,
+  \qquad
+  J_w=\rho_d\,h_m\left(C_s-\Cinf\right),
+\end{equation}
+其中 $J_w$ 的单位是 kg/(m$^2\cdot$s)，\textbf{不得}把 $h_m(C_s-\Cinf)$
+直接乘潜热当热通量——它的单位是 kg/(kg$\cdot$s)，不是 kg/(m$^2\cdot$s)，
+必须乘密度基准 $\rho_d$。
+
+\begin{table}[H]
+  \centering
+  \caption{M0 与 M1 的对照}
+  \label{tab:M1}
+  \footnotesize
+  \begin{tabular}{@{}lccc@{}}
+    \toprule
+    项 & M0 & M1 & 差 \\
+    \midrule
+    3 h 中心温度 & $49.849\ ^\circ$C & $31.786\ ^\circ$C & $\mathbf{-18.06}$ K \\
+    3 h 表面温度 & $49.967\ ^\circ$C & $32.402\ ^\circ$C & $-17.56$ K \\
+    3 h 中心含水率 & 1.7662 & 2.2515 & $+0.485$（\textbf{更慢}） \\
+    $\tstar$ & 57.49 h & 60.33 h & $\mathbf{+2.84}$ h（$\times1.049$） \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{quote}
+  \textbf{与文献的定量交叉验证}：文献 [1b] 报道``忽略潜热会使初期物料温度预测
+  偏高 $12\sim22\ ^\circ\mathrm{C}$''。本项目独立复现的差值是 $\mathbf{18.06}$ K，
+  \textbf{落在该区间内}——一次独立定量印证。
+\end{quote}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth]{FIG-43_latent.png}
+  \caption{潜热开关对照}
+  \label{fig:FIG43}
+\end{figure}
+
+\textbf{为什么不能据此修订问题3 答案}：M1 的量级\textbf{正比于干基密度 $\rho_d$}，
+而 $\rho_d$ 在本题中\textbf{没有给定}：
+
+\begin{itemize}[leftmargin=1.6em, itemsep=2pt]
+  \item 附录3 的 $\rho(C)=650+128C$ 是\textbf{湿物料体积密度}；
+  \item 由它反推的 $\rho_d=\rho(C)/(1+C)$ 在 $C=0$ 给 650、在 $C=2.55$ 给 275.0
+        ——\textbf{不是常数}，与``干物质守恒''\textbf{不兼容}；
+  \item 本项目取\textbf{初始状态基准} $\rho_d=976.4/3.55=275.042$ kg/m$^3$
+        并\textbf{显式声明}。
+\end{itemize}
+
+$\rho_d$ 翻倍则潜热效应翻倍（严格正比，相邻比 $2.03\sim2.07$）：
+
+\begin{table}[H]
+  \centering
+  \footnotesize
+  \begin{tabular}{@{}lccc@{}}
+    \toprule
+    $\rho_d$ 倍率 & $\rho_d$ / (kg/m$^3$) & $\tstar$ / h & $\Delta$ vs M0 \\
+    \midrule
+    0.25 & 68.76 & 58.17 & $+0.68$ h \\
+    0.50 & 137.52 & 58.87 & $+1.38$ h \\
+    \textbf{1.00（本文采用）} & \textbf{275.04} & \textbf{60.33} & $\mathbf{+2.84}$ h \\
+    2.00 & 550.08 & 63.37 & $+5.88$ h \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{quote}
+  \textbf{结论}：M1 只能写成``\textbf{在本文声明的 $\rho_d$ 取值下}，
+  蒸发潜热使 3 h 中心温度低约 18 K、使 $\tstar$ 延长约 2.8 h''。
+  \textbf{不得}写成``药材真实烘干时间应为 60.3 h''，
+  也\textbf{不得}用 M1 替换问题3 的答案。
+\end{quote}
+
+\subsection{烘房系统模型（M2 工程推广）}
+
+本文把烘房环境作为\textbf{给定边界}（单向驱动），这是 M0 的合理简化。
+若需预测新工况（改变装料量、换气量、加热策略），
+应升级为\textbf{烘房—物料双向耦合系统模型}。正确的水分收支形式
+（简化充分混合空气）为
+\begin{equation}
+  \frac{\mathrm d}{\mathrm dt}\left(M_{da}Y\right)
+  =\dot m_{da,\mathrm{in}}Y_{\mathrm{in}}
+   -\dot m_{da,\mathrm{out}}Y+\sum_i A_i J_{w,i}-\dot m_{\mathrm{cond}},
+\end{equation}
+还需\textbf{干空气质量平衡}。
+
+\begin{quote}
+  若 $M_{da}$ 不变，才可写成 $M_{da}\dot Y$；
+  \textbf{不能用 $V_{air}\dot Y$ 等于质量流率的形式}——量纲不闭合。
+\end{quote}
+
+\textbf{数据需求}：空气干质量、装料量、加热与排湿条件、
+新风/排风干空气质量流量或除湿速率。
+\textbf{验证方式}：选择实测环境作为验证数据，
+\textbf{不能同时将环境固定与自由求解}。
+
+\subsection{品质后处理（M2 推广）}
+
+有目标成分动力学后，可沿材料轨迹计算成分保留分数：
+\begin{equation}
+  \frac{q(t)}{q(0)}=\exp\left[-\int_0^t k_q\!\left(T(\tau),C(\tau)\right)\mathrm d\tau\right].
+\end{equation}
+这是\textbf{待标定的候选动力学}，不是文献为本题药材提供的通用公式。
+
+\begin{table}[H]
+  \centering
+  \footnotesize
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    扩展方向 & 额外数据需求 \\
+    \midrule
+    微生物 & 水活度关系 $a_w(C,T)$、菌种、初始菌量 \\
+    结构（结壳 / 开裂） & 应变、本构关系、强度参数 \\
+    挥发成分保留 & 成分种类、组织结构、动力学参数 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\textbf{无水活度关系时}：只能说明``含水率达标 $\ne$ 微生物合格''，
+\textbf{不能制定通用杀菌温度}。
+
+\subsection{结构力学（M2 路线）}
+
+建模链路（仅作路线描述）：
+湿度场 $\to$ 收缩应变 $\to$ 本构关系 $\to$ 应力场 $\to$ 断裂判据 $\to$ 诊断量。
+
+\begin{quote}
+  不能由湿度梯度直接算裂纹概率或裂纹位置，
+  也不能把``多缩 $7\%$''当作仿射收缩的验证。
+  可输出梯度作为\textbf{非标定诊断量}，但不叫``裂纹概率''。
+  \textbf{题目半径数据不证明内部均匀收缩。}
+\end{quote}

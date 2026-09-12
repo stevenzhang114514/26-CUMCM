@@ -1,0 +1,66 @@
+% 附录 B 代码清单
+% ⚠️ 本文件必须用 Write 工具直接写：先前用 Python 生成时，
+%    \noindent / \texttt 里的 \n、\t 被当成转义字符吃掉，产生了 CR/TAB 控制符。
+\subsection*{B.1　配置与单位约定}
+\noindent\texttt{config.py}（196 行）
+\lstinputlisting[language=Python]{code/01_config.py}
+
+\subsection*{B.2　物性公式（附录2/3/4）}
+\noindent\texttt{properties.py}（158 行）
+\lstinputlisting[language=Python]{code/02_properties.py}
+
+\subsection*{B.3　FVM 离散（半控制体 / 调和平均 / 渐变网格）}
+\noindent\texttt{fvm\_cyl.py}（376 行）
+\lstinputlisting[language=Python]{code/03_fvm_cyl.py}
+
+\subsection*{B.4　非线性迭代（Picard，双重判据）}
+\noindent\texttt{nonlinear.py}（110 行）
+\lstinputlisting[language=Python]{code/04_nonlinear.py}
+
+\subsection*{B.5　时间推进（Backward Euler + 自适应步长）}
+\noindent\texttt{time\_stepper.py}（293 行）
+\lstinputlisting[language=Python]{code/05_time_stepper.py}
+
+\subsection*{B.6　双向耦合装配}
+\noindent\texttt{coupled.py}（179 行）
+\lstinputlisting[language=Python]{code/06_coupled.py}
+
+\subsection*{B.7　边界条件（M0 + M1 潜热）}
+\noindent\texttt{boundary.py}（271 行）
+\lstinputlisting[language=Python]{code/07_boundary.py}
+
+\subsection*{B.8　环境插值（附件1）}
+\noindent\texttt{env\_interp.py}（159 行）
+\lstinputlisting[language=Python]{code/08_env_interp.py}
+
+\subsection*{B.9　长时环境外推（平台值）}
+\noindent\texttt{env\_extrap.py}（155 行）
+\lstinputlisting[language=Python]{code/09_env_extrap.py}
+
+\subsection*{B.10　问题1 求解}
+\noindent\texttt{problem1.py}（146 行）
+\lstinputlisting[language=Python]{code/10_problem1.py}
+
+\subsection*{B.11　问题2 求解（全程变物性）}
+\noindent\texttt{problem2.py}（340 行）
+\lstinputlisting[language=Python]{code/11_problem2.py}
+
+\subsection*{B.12　问题3 阈值通过时刻（事件早停 + 二分）}
+\noindent\texttt{problem3.py}（248 行）
+\lstinputlisting[language=Python]{code/12_problem3.py}
+
+\subsection*{B.13　问题4 求解（材料坐标 + 收缩）}
+\noindent\texttt{problem4.py}（292 行）
+\lstinputlisting[language=Python]{code/13_problem4.py}
+
+\subsection*{B.14　问题3 二维轴对称端面对照}
+\noindent\texttt{problem3\_2d.py}（392 行）
+\lstinputlisting[language=Python]{code/14_problem3_2d.py}
+
+\subsection*{B.15　主运行脚本（问题1--3）}
+\noindent\texttt{run\_day3.py}（621 行）
+\lstinputlisting[language=Python]{code/15_run_day3.py}
+
+\subsection*{B.16　主运行脚本（问题4）}
+\noindent\texttt{run\_p4.py}（256 行）
+\lstinputlisting[language=Python]{code/16_run_p4.py}

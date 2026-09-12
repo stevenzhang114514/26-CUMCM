@@ -1,0 +1,469 @@
+\appendix
+
+% 规范第五条：附录内容应包括**支撑材料的文件列表**。
+% 规范第十一条：完整可运行的源程序随**支撑材料**提交。
+% 为便于纸质打印与审阅，附录 B 不重复排印源码（原为 16 个模块全文，约 70 页），
+% 改为**核心算法伪代码 + 源码索引**；伪代码与源码逐句对应。
+
+% 🔴 修正：原先写成 \section{附录 A：…}，而 \appendix 已使 \thesection = A，
+%    渲染结果重复成「A 附录 A：支撑材料文件列表」。现只写标题正文。
+%    同时给附录内的表独立编号（表 A.1、B.1 …），避免与正文连续编号混排
+%    （修正前附录第一张表编号为「表 38」）。
+\setcounter{table}{0}
+\renewcommand{\thetable}{\thesection.\arabic{table}}
+
+% ==========================================================================
+\section{支撑材料文件列表}
+\setcounter{table}{0}
+
+\noindent 支撑材料打包为单个压缩文件（\texttt{ZIP}，$<20$\,MB）。
+\textbf{建模所用的全部完整、可运行源程序随支撑材料提交}，
+其源码索引与核心算法伪代码见附录 B。目录结构与文件列表如下。
+
+\begin{table}[H]
+  \centering
+  \caption{支撑材料目录结构}
+  \label{tab:supportfiles}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{@{}lX@{}}
+    \toprule
+    目录 / 文件 & 内容 \\
+    \midrule
+    \texttt{01\_result/} &
+      四个正式结果 \texttt{result1--result4.xlsx}；
+      各结果对应的 \texttt{resultN\_运行信息.xlsx}（网格、步长、口径与终止条件）；
+      题设表 1--6；\texttt{说明.md} \\
+    \texttt{02\_代码/00\_公共内核/} &
+      完整 \texttt{src/} 包（\texttt{config}、\texttt{numerics}、\texttt{models}、
+      \texttt{io}、\texttt{data\_prep}、\texttt{validation}、\texttt{figures}），
+      保持 import 结构，\textbf{可直接运行} \\
+    \texttt{02\_代码/01\_问题1/}\,$\cdots$\,\texttt{04\_问题4/} &
+      各题专属模块与运行、校验脚本（四题共 24 个脚本），按题归档便于查阅 \\
+    \texttt{02\_代码/README\_代码说明.md} &
+      运行方法与全部脚本清单 \\
+    \texttt{03\_参考文献/} &
+      引用核实清单（含 DOI 反查结果）、原文 PDF、下载记录、文献研报与检索工具 \\
+    \texttt{04\_提示词与分工清单/} &
+      分工方案、论文骨架、被省略因素汇总、求解框架、论文修订记录 \\
+    \texttt{05\_图片/} &
+      全部 23 张插图的 PNG（300\,dpi）与 PDF（矢量）、出图脚本、图目录 \\
+    \texttt{AI 工具使用详情.pdf} &
+      依《人工智能工具使用规定》第 4 条提供 \\
+    \texttt{README.md} & 支撑材料总说明与复现步骤 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection*{A.1 运行环境}
+
+Python 3.14.2、NumPy 2.4.4、SciPy 1.18.0、Matplotlib 3.11.0；
+问题4 的对照实现另用 MATLAB。全部脚本纯 CPU、单线程即可复现；
+除数据扰动 Monte Carlo 部分外不含随机数，该部分固定随机种子。
+
+\subsection*{A.2 复现命令}
+
+以 \texttt{02\_代码/00\_公共内核/} 为工作目录：
+
+\begin{lstlisting}[language=bash, numbers=none]
+pip install -r requirements.txt
+python scripts/run_day3.py --stage all         # 问题1-3：冻结、收敛、复现
+python scripts/run_p4.py   --stage all         # 问题4：主结果、网格、时间收敛
+python scripts/p4_paper.py --stage all         # 论文口径的表6 与 B 方案
+python scripts/run_sens_param.py --stage all   # 参数灵敏度 ±5/10/20%
+python scripts/run_robust_data.py --stage all  # 数据扰动稳健性
+\end{lstlisting}
+
+% ==========================================================================
+\section{核心算法伪代码与源码索引}
+\setcounter{table}{0}
+
+\noindent 建模与求解所用的\textbf{完整、可运行源程序}随支撑材料提交，
+见附录 A 的 \texttt{02\_代码/}（\texttt{src/} 包共 30 个功能模块、另有 7 个包
+\texttt{\_\_init\_\_} 文件；按题归档的运行与校验脚本 24 个）。
+为便于纸质打印与复核，本附录\textbf{不重复排印源码}，
+只给出核心算法的伪代码与源码索引（表 \ref{tab:srcindex} 的 16 个文件即求解内核
+与两个主运行脚本，共 4192 行）。
+
+\noindent 下列伪代码与源码\textbf{逐句对应}：每条算法下方标注其在支撑材料中的
+文件与入口函数，行号与变量名均取自源码。
+
+\subsection*{B.1 源码索引}
+
+\begin{table}[H]
+  \centering
+  \caption{核心源码索引（路径前缀 \texttt{02\_代码/00\_公共内核/src/}）}
+  \label{tab:srcindex}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{@{}llrX@{}}
+    \toprule
+    模块 & 功能 & 行数 & 对应算法 \\
+    \midrule
+    \texttt{config.py}          & 配置与单位约定            & 196 & --- \\
+    \texttt{numerics/properties.py} & 物性公式（附录2/3/4）& 158 & --- \\
+    \texttt{numerics/fvm\_cyl.py}   & 有限体积离散内核     & 376 & 算法 \ref{alg:fvm} \\
+    \texttt{numerics/nonlinear.py}  & Picard 迭代与双重判据 & 110 & 算法 \ref{alg:fvm}\,/\,\ref{alg:picard} \\
+    \texttt{numerics/time\_stepper.py} & Backward Euler 自适应步长 & 293 & 算法 \ref{alg:stepper} \\
+    \texttt{numerics/coupled.py}    & 双向耦合块迭代       & 179 & 算法 \ref{alg:picard} \\
+    \texttt{models/boundary.py}     & 边界条件（M0 + M1 潜热） & 271 & 算法 \ref{alg:fvm} \\
+    \texttt{data\_prep/env\_interp.py}  & 环境插值（附件1） & 159 & --- \\
+    \texttt{data\_prep/env\_extrap.py}  & 长时环境外推（平台值） & 155 & --- \\
+    \texttt{models/problem1.py}     & 问题1 求解           & 146 & --- \\
+    \texttt{models/problem2.py}     & 问题2 求解（全程变物性） & 340 & --- \\
+    \texttt{models/problem3.py}     & 问题3 阈值通过时刻   & 248 & 算法 \ref{alg:threshold} \\
+    \texttt{models/problem4.py}     & 问题4 材料坐标与收缩 & 292 & 算法 \ref{alg:material} \\
+    \texttt{models/problem3\_2d.py} & 问题3 二维轴对称端面对照 & 392 & --- \\
+    \texttt{scripts/run\_day3.py}   & 主运行脚本（问题1--3，写盘 result1--3） & 621 & --- \\
+    \texttt{scripts/run\_p4.py}     & 主运行脚本（问题4，写盘 result4） & 256 & --- \\
+    \midrule
+    合计 & 16 个文件 & \textbf{4192} & 5 个算法 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\noindent 表中\textbf{行数由脚本统计}，等于各文件实际行数之和。
+未列入本表的还有 \texttt{validation/}（解析基准、守恒量、收敛阶等 5 个校验模块）、
+\texttt{figures/}（出图）、\texttt{io/}（写盘与重采样）等辅助模块，
+以及按题归档的 24 个运行与校验脚本（参数灵敏度、数据扰动、端面对照等），
+一并随支撑材料提交。
+
+% ---------------------------------------------------------------- 算法 1
+\subsection*{B.2 算法 \ref{alg:fvm}：圆柱半控制体有限体积装配}
+
+\begin{algorithm}[H]
+\caption{圆柱半控制体有限体积装配（\texttt{fvm\_cyl.py}：\texttt{assemble}，第 195--282 行）}
+\label{alg:fvm}
+\Input{单元扩散系数 $\Gamma_i$（传热取 $k$，传质取 $D$）；表面对流系数 $h$；
+       环境值 $\phi_\infty$；网格 $\{r_f,r_c,h,V,A\}$；
+       体积热容 $\mathrm{cap}_i$（仅变物性传热用，否则为 \texttt{None}）}
+\Output{三对角算子 $(\mathbf d,\boldsymbol\ell,\mathbf u,\mathbf b)$ 与 $\mathrm{Bi}_\Delta$，
+        使 $\dot\phi = M\phi+\mathbf b$}
+\BlankLine
+$\Gamma_f \gets$ 面扩散系数
+  \Comment*[r]{调和平均 $\Gamma_f[j]=\frac{2\Gamma_{j-1}\Gamma_j}{\Gamma_{j-1}+\Gamma_j}$，端点取单侧值}
+$V^d_i \gets V_i\cdot\mathrm{cap}_i$
+  \Comment*[r]{守恒形式整体除以 $(\rho c_p)_iV_i$；\texttt{None} 时 $V^d_i\gets V_i$}
+\BlankLine
+\Comment*[r]{中心控制体 $i=0$：$r=0$ 面通量恒为 0，半圆柱体积天然规避 $1/r$ 奇点}
+$c_0 \gets A_1\Gamma_f[1]/(h_0V^d_0)$\;
+$d_0 \gets -c_0$，$u_0 \gets +c_0$\;
+\BlankLine
+\For{$i \gets 1$ \KwTo $N-2$}{
+  \Comment*[r]{内部单元：内、外两个面各贡献一项}
+  $a^- \gets A_i\Gamma_f[i]/(h_{i-1}V^d_i)$\;
+  $a^+ \gets A_{i+1}\Gamma_f[i+1]/(h_iV^d_i)$\;
+  $d_i \gets -(a^-+a^+)$，$\ell_i \gets a^-$，$u_i \gets a^+$\;
+}
+\BlankLine
+\Comment*[r]{表面单元 $i=N-1$：Robin 条件 $\partial\phi/\partial r\approx(\phi_s-\phi_N)/d$ 与}
+\Comment*[r]{线性剖面联立，消去面值 $\phi_s$（单元中心格式的二阶边界处理）}
+$d \gets R_0-r_c[N-1]$\;
+\eIf{$\Gamma_f[N]>0$ 且 $d>0$}{
+  $\mathrm{Bi}_\Delta \gets h\,d/\Gamma_f[N]$\;
+  $\beta \gets A_N h/\bigl[(1+\mathrm{Bi}_\Delta)V^d_{N-1}\bigr]$\;
+}{
+  $\mathrm{Bi}_\Delta \gets \infty$，$\beta \gets A_N h/V^d_{N-1}$\;
+}
+$a^+ \gets A_{N-1}\Gamma_f[N-1]/(h_{N-2}V^d_{N-1})$\;
+$d_{N-1} \gets -(a^++\beta)$，$\ell_{N-1} \gets a^+$，$b_{N-1} \gets \beta\phi_\infty$\;
+\Return $(\mathbf d,\boldsymbol\ell,\mathbf u,\mathbf b)$，$\mathrm{Bi}_\Delta$\;
+\end{algorithm}
+
+\noindent\textbf{说明}：传热时 $\Gamma_i$ 传 $k$（W/(m$\cdot$K)）、$h$ 传
+\textbf{未归一化的} $h$（W/(m$^2\cdot$K)），由 $\mathrm{cap}_i=(\rho c_p)_i$ 完成归一化；
+传质时 $\Gamma_i$ 传 $D$、$h$ 传 $h_m$，二者量纲同为 m/s。
+\textbf{$k$ 在面上取调和平均、$(\rho c_p)$ 在单元上取值，两者不可合并} ——
+若误令 $\Gamma=k/(\rho c_p)$ 再走同一条路径，等于把 $k$ 与 $\rho c_p$
+在同一个面上一起做调和平均，与本工况 $\rho c_p$ 沿 $r$ 变化数倍的事实不符。
+
+% ---------------------------------------------------------------- 算法 2
+\subsection*{B.3 算法 \ref{alg:picard}：双向耦合的块 Gauss--Seidel Picard 迭代}
+
+\begin{algorithm}[H]
+\caption{双向耦合块迭代（\texttt{coupled.py}：\texttt{block\_picard\_solve}，第 71--154 行）}
+\label{alg:picard}
+\Input{上一时刻解 $T^n,C^n$；步长 $\Delta t$ 与 $\theta$；
+       两个装配回调 $\mathrm{assemble}_C(C,T)$、$\mathrm{assemble}_T(T,C)$；
+       收敛容差 \texttt{tol\_T}/\texttt{tol\_C}}
+\Output{$T^{n+1},C^{n+1}$ 及迭代记录（迭代数、更新量、真残差）}
+\BlankLine
+$T \gets T^n$，$C \gets C^n$，$\mathrm{prev} \gets \infty$\;
+\For{$k \gets 1$ \KwTo \texttt{max\_iter}}{
+  \Comment*[r]{① 水分场：$D=D(C,T)$ 显含温度，故须用当前 $T$}
+  $M_C \gets \mathrm{assemble}_C(C,T)$\;
+  $C \gets$ 隐式单步$(M_C, C^n, \Delta t, \theta)$\;
+  \BlankLine
+  \Comment*[r]{② 温度场：用\textbf{最新}的 $C$（Gauss--Seidel，非 Jacobi）}
+  $M_T \gets \mathrm{assemble}_T(T,C)$\;
+  $T \gets$ 隐式单步$(M_T, T^n, \Delta t, \theta)$\;
+  \BlankLine
+  \Comment*[r]{③ 双重判据：更新量\textbf{与}真残差都必须满足}
+  $\mathrm{upd} \gets \max\bigl(\mathrm{upd}_T,\mathrm{upd}_C\bigr)$，
+  $\mathrm{upd}_\bullet = \max_i\dfrac{|u^{k+1}_i-u^k_i|}{\mathrm{atol}_u+\mathrm{rtol}_u|u^{k+1}_i|}$\;
+  \Comment*[r]{真残差：在\textbf{新解处重新装配}算子后计算 $F(u^{k+1})$}
+  $F \gets (u-u^n)/\Delta t - M(u)\,u - \mathbf b(u)$\;
+  $\mathrm{res} \gets \max\bigl(\mathrm{res}_T,\mathrm{res}_C\bigr)$，
+  $\mathrm{res}_\bullet = \max_i\dfrac{|F_i|}{\mathrm{atol}_r+\mathrm{rtol}_r\max(|u_i/\Delta t|,10^{-3})}$\;
+  \BlankLine
+  \If{$\mathrm{upd}\le 1$ \textbf{且} $\mathrm{res}\le 1$}{
+    \Return $T,C$，\texttt{converged}$\gets$真\;
+  }
+  \Comment*[r]{停滞检测：更新量不再显著下降即失败，交由外层折半步长重试}
+  \If{$k>3$ \textbf{且} $\mathrm{upd}>0.5\,\mathrm{prev}$ \textbf{且} $\mathrm{upd}>1$}{
+    \textbf{抛出} \texttt{NonlinearFailure}\;
+  }
+  $\mathrm{prev} \gets \mathrm{upd}$\;
+}
+\textbf{抛出} \texttt{NonlinearFailure}（达到最大迭代次数）\;
+\end{algorithm}
+
+\noindent\textbf{为什么用 Picard 而非 Newton}：每次子求解的迭代矩阵保持
+\textbf{M-矩阵}性质，离散极值原理成立，$C$ 与 $T$ 的正性由构造保证，
+无需任何裁剪，也不会像 Newton 那样过冲进入 $\exp(-0.89/C)$ 的悬崖区。
+\textbf{为什么残差判据不可省}：只检查更新量会落入``更新量变小但残差停滞''
+的陷阱；本工况在 $\Delta t$ 较大时曾实际出现。
+
+% ---------------------------------------------------------------- 算法 3
+\subsection*{B.4 算法 \ref{alg:stepper}：隐式自适应时间推进与事件早停}
+
+\begin{algorithm}[H]
+\caption{自适应时间推进（\texttt{time\_stepper.py}：\texttt{AdaptiveStepper.integrate}，第 107--287 行）}
+\label{alg:stepper}
+\Input{初值 $(t_0,u_0)$；终止时刻 $t_{\text{end}}$；输出时刻表 $t_{\text{out}}$；
+       单步回调 $\Phi$；事件函数 \texttt{stop\_fn}；容差 $\mathrm{atol},\mathrm{rtol}$}
+\Output{输出时刻上的解序列 $u_k$、步长历史、终止原因}
+\BlankLine
+$t \gets t_0$，$u \gets u_0$，$\Delta t \gets \Delta t_0$\;
+\While{$t < t_{\text{end}}$}{
+  $\Delta t \gets \min\bigl(\Delta t,\ t_{\text{out,next}}-t\bigr)$
+    \Comment*[r]{裁剪到恰好落在下一个输出时刻 —— \textbf{输出从不靠插值}}
+  \BlankLine
+  \Comment*[r]{Richardson 误差估计：一步全步长 与 两步半步长 之差}
+  $u_{\text{full}} \gets \Phi(t,u,\Delta t)$\;
+  $u_{\text{half}} \gets \Phi\bigl(t+\tfrac{\Delta t}{2},\Phi(t,u,\tfrac{\Delta t}{2}),\tfrac{\Delta t}{2}\bigr)$\;
+  $\mathrm{err} \gets \max_i\dfrac{|u_{\text{half},i}-u_{\text{full},i}|}{\mathrm{atol}+\mathrm{rtol}|u_{\text{half},i}|}$\;
+  \BlankLine
+  \eIf{$\mathrm{err}\le 1$}{
+    接受：$t \gets t+\Delta t$，$u \gets u_{\text{half}}$
+      \Comment*[r]{局部外推提高精度}
+    \If{\texttt{stop\_fn}$(t,u)$}{
+      \Return 终止原因 $\gets$ \texttt{event}\;
+    }
+    $\Delta t \gets \Delta t\cdot\min\bigl(\text{grow},\ \max(\text{safety}\cdot\mathrm{err}^{-1/(p+1)},\text{shrink})\bigr)$\;
+  }{
+    拒绝：$\Delta t \gets \Delta t\cdot\text{shrink}$，$u$ 不变
+      \Comment*[r]{$\Phi$ 抛 \texttt{NonlinearFailure} 时同样折半重试}
+  }
+  \If{$\Delta t < \Delta t_{\min}$}{
+    \textbf{抛出} \texttt{StepSizeTooSmall}\;
+  }
+}
+\Return $u$，终止原因 $\gets$ \texttt{t\_end}\;
+\end{algorithm}
+
+\noindent\textbf{为什么必须隐式}：半控制体 FVM 中心处的显式稳定性上限约
+$\Delta t\le\Delta r^2/(4\alpha)$；取 $\Delta r=0.5$\,mm、
+$\alpha=k/(\rho c_p)=1.6886\times10^{-7}$\,m$^2$/s 时该上限约 \textbf{0.37\,s}，
+无法满足 1\,s 的输出间隔，故采用 L-稳定的 Backward Euler（$\theta=1$，$p=1$）。
+Crank--Nicolson（$\theta=0.5$，$p=2$）已实现，但\textbf{仅用于线性温度基准}
+验证时间二阶精度；对刚性的水分方程不使用，因其在陡峭前沿处会产生振铃。
+
+% ---------------------------------------------------------------- 算法 4
+\subsection*{B.5 算法 \ref{alg:threshold}：问题 3 阈值通过时刻定位}
+
+\begin{algorithm}[H]
+\caption{阈值通过时刻定位（\texttt{problem3.py}：\texttt{locate\_threshold}，第 114--208 行）}
+\label{alg:threshold}
+\Input{问题2 求解器配置；输出间隔 $\Delta t_{\text{out}}$；阈值 $\phi_*=0.15$；
+       二分容差 $\varepsilon$；复核增量 $\Delta t_{\text{chk}}$}
+\Output{$t_*=\inf\{t:\ C_{\max}(t)<\phi_*\}$ 及其括号区间、复核值}
+\BlankLine
+\Comment*[r]{阶段①：粗扫，$\Delta t_{\text{out}}$ 输出，\textbf{达标即停}}
+$t_{\text{out}} \gets \Delta t_{\text{out}},2\Delta t_{\text{out}},\dots$
+  \Comment*[r]{不早停则要跑满 6 天上限，而真实 $t_*$ 约 2.4 天}
+$\texttt{stop\_fn}(t,u) \gets \bigl[\max_i C_i(t)<\phi_*\bigr]$\;
+$(u,\text{ex}) \gets$ 求解，带 \texttt{stop\_fn}\;
+$C_{\max}[k] \gets \max_i C_i$，$r_{\arg}[k] \gets \arg\max_i C_i$
+  \Comment*[r]{全域取 $\max$ 并\textbf{记录位置}，不假定它在中心}
+\BlankLine
+\eIf{$\exists k:\ C_{\max}[k]<\phi_*$}{
+  $k_b \gets$ 首个跌破的输出序号\;
+  $t_{\text{hi}} \gets t[k_b]$，$t_{\text{anchor}} \gets t[k_b-1]$（$k_b=0$ 时取 $0$）\;
+}{
+  \Comment*[r]{早停点落在两个输出时刻之间 —— 只认输出会\textbf{误判为不可达标}}
+  $t_{\text{hi}} \gets t_{\text{final}}$，$t_{\text{anchor}} \gets t_{\text{last out}}$\;
+}
+$u_{\text{anchor}} \gets u(t_{\text{anchor}})$\;
+\BlankLine
+\Comment*[r]{阶段②：二分。\textbf{锚点固定}，每次试算都从锚点积到试探时刻}
+\While{$t_{\text{hi}}-t_{\text{lo}} > \varepsilon$}{
+  $t_m \gets (t_{\text{lo}}+t_{\text{hi}})/2$\;
+  $C_m \gets$ 从 $(t_{\text{anchor}},u_{\text{anchor}})$ 积分到 $t_m$，取 $\max_i C_i$\;
+  \eIf{$C_m < \phi_*$}{$t_{\text{hi}} \gets t_m$}{$t_{\text{lo}} \gets t_m$}
+}
+$t_* \gets t_{\text{hi}}$\;
+\BlankLine
+\Comment*[r]{复核一：$t_*$ 处的实际 $C_{\max}$；复核二：其后一个受控小增量}
+$C_{\max}(t_*)$ $\gets$ 重积至 $t_*$\;
+$C_{\max}(t_*+\Delta t_{\text{chk}})$ $\gets$ 重积至 $t_*+\Delta t_{\text{chk}}$
+  \Comment*[r]{验证``持续达标''而非仅``瞬时达标''}
+\Return $t_*$，括号区间 $(t_{\text{lo}},t_{\text{hi}})$，事件误差 $\varepsilon/2$\;
+\end{algorithm}
+
+\noindent\textbf{三个必须守住的点}：
+（i）\textbf{不得用平均值代替最大值} —— 题面要求``各处''均低于 0.15，
+本模块仍对全域取 $\max$ 并记录 $\arg\max$ 位置，\textbf{不直接假定最大值在中心}；
+（ii）\textbf{锚点必须固定} —— 早期实现把左端往前挪却不更新锚点状态，
+等价于``从新时刻、旧状态''出发，收敛后给出的 $t_*$ 处 $C_{\max}$ 仍大于阈值
+（实测 0.15009），是一个不报错但结果错的缺陷；
+（iii）\textbf{三类误差分开报告} —— 事件定位误差 $\varepsilon/2=0.5$\,ms、
+空间离散误差、时间积分误差，\textbf{定位到 1\,s 不代表干燥时间整体准确到 1\,s}。
+
+% ---------------------------------------------------------------- 算法 5
+\subsection*{B.6 算法 \ref{alg:material}：问题 4 的材料坐标与收缩}
+
+\begin{algorithm}[H]
+\caption{材料坐标下的收缩求解（\texttt{problem4.py}：\texttt{assemble}\,/\,\texttt{solve\_p4}，第 132--245 行）}
+\label{alg:material}
+\Input{附件2 的半径数据 $R(t)$（145 点，2.000$\to$1.198\,cm）；节点式 $\xi$ 网格 $N$、渐变率 $\gamma$}
+\Output{物理坐标下的 $C(r,t)$、表面浓度与干燥时长 $\tdry$}
+\BlankLine
+\Comment*[r]{坐标变换 $\xi=r/R(t)\in[0,1]$：同一个 $\xi$ 永远对应同一块物料}
+节点 $\xi_i \gets 1-(1-\zeta_i)^\gamma$，$\zeta_i \gets i/(N-1)$
+  \Comment*[r]{节点式：$\xi_{N-1}=1$ 落在表面，与对照实现逐位一致}
+界面 $f_j \gets (\xi_{j-1}+\xi_j)/2$\;
+体积权 $w_i \gets \int_{\text{左界面}}^{\text{右界面}}\xi\,\mathrm d\xi$\;
+半径 $R(t) \gets$ 附件2 的 PCHIP 插值\;
+\BlankLine
+\Comment*[r]{控制方程：$\rho c_p\,\partial_t T|_\xi=\frac{1}{R^2\xi}\partial_\xi(k\,\xi\,\partial_\xi T)$，水分同形}
+\Comment*[r]{★ 均匀仿射收缩下\textbf{方程中没有 $\dot R$ 对流项} —— 材料导数已吸收材料运动}
+\For{每个时间步 $n$}{
+  $\mathrm{cap}_i \gets (\rho c_p)_i$，$k_i \gets k(C_i,T_i)$
+    \Comment*[r]{变物性用守恒形式，同算法 \ref{alg:fvm}}
+  $R \gets R(t^n)$\;
+  \Comment*[r]{扩散项 $\propto 1/R^2$；表面对流项 $\propto 1/R$ —— 二者不可合并}
+  装配算子：内部面系数 $\Gamma_f/(R^2\Delta\xi)$，表面项
+    $\beta \gets A_N h_m/\bigl[(1+\mathrm{Bi}_\Delta)R\bigr]$\;
+  块迭代求解（算法 \ref{alg:picard}）得 $T^{n+1},C^{n+1}$\;
+}
+\BlankLine
+\Comment*[r]{写盘时换回物理坐标 $r=\xi\,R(t)$，并在末列标注``药材表面''}
+\Return $\tdry = \inf\{t:\ \max_\xi C(\xi,t)<0.15\}$（算法 \ref{alg:threshold} 定位）\;
+\end{algorithm}
+
+\noindent\textbf{关键点}：（i）扩散项 $\propto1/R^2$、表面项 $\propto1/R$，
+二者随收缩的变化率不同，\textbf{不可合并为一个等效系数}；
+（ii）网格采用\textbf{节点式}约定，与对照实现逐位一致 ——
+本模块最初用``单元式''约定，在均匀网格上最外控制体宽度即差 \textbf{1.9 倍}
+（0.0500 对 0.0263），对边界层主导的问题会显著改变 $\tdry$，
+故改用节点式并显式验证均匀 $N=20$、$\gamma=1$ 时可复现对照实现的 73.033\,h。
+
+% ==========================================================================
+\section{结果文件说明}
+\setcounter{table}{0}
+
+\begin{table}[H]
+  \centering
+  \caption{四个 result 文件的规格}
+  \label{tab:resultfiles}
+  \footnotesize
+  % 「规格」列最长且不可断行，必须是可伸缩列（X）；原先把它写成 l，
+  % 导致整表超出 \textwidth 13.6 pt（实测）。
+  \begin{tabularx}{\textwidth}{@{}llX@{}}
+    \toprule
+    文件 & 内容 & 规格 \\
+    \midrule
+    \texttt{result1.xlsx} & 问题1 温度、水分浓度
+      & 双 sheet，1 s $\times$ 0.1 cm，1--1800 s \\
+    \texttt{result2.xlsx} & 问题2 温度、水分浓度
+      & 双 sheet，1 s $\times$ 0.1 cm，1--10800 s \\
+    \texttt{result2\_全程版.xlsx} & 问题2 全程版
+      & 双 sheet，60 s $\times$ 0.1 cm，60--206960 s \\
+    \texttt{result3.xlsx} & 问题3 水分浓度
+      & 单 sheet，60 s $\times$ 0.1 cm，60--206960 s（\textbf{末行为达标时刻}） \\
+    \texttt{result4.xlsx} & 问题4 水分浓度（收缩）
+      & 单 sheet，60 s，距离轴\textbf{只到 1.9 cm}，
+        末列为字符串\textbf{``药材表面''}，域外\textbf{留空}（不填 0） \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\noindent 四个文件的 sheet 名、表头、距离轴与时间轴\textbf{均按题目附件3 的模板逐字符对齐}。
+每个正式结果另附 \texttt{resultN\_运行信息.xlsx}，记录该次运行的网格、步长、
+判据口径与终止条件，\textbf{仅作溯源，不属于题目要求交付的表}。
+
+\noindent 题设表 1--6 的数值直接取自上述结果文件（由脚本生成，不手工抄录），
+保留四位小数，域外位置留空。
+
+% ==========================================================================
+\section{图表清单}
+\setcounter{table}{0}
+
+% 🔴 修正：原先「编号」列写成「图 1…图 23」，与正文实际编号（\thefigure = G<序号>）不符；
+%    正文引用形如「由图 G12 可见」。现按 main.aux 的实测映射逐行改正。
+\begin{table}[H]
+  \centering
+  \caption{本文插图清单（编号即正文中的引用号）}
+  \label{tab:figlist}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{@{}llX@{}}
+    \toprule
+    编号 & 文件名 & 内容 \\
+    \midrule
+    图 G1 & G1\_geometry & 几何、边界与求解路线合图 \\
+    图 G2 & G1b\_flowchart & 技术路线流程图 \\
+    图 G3 & G2\_env & 附件1 环境数据及插值 \\
+    图 G4 & FIG-13\_smoothing & 环境插值 vs 受控平滑对照 \\
+    图 G5 & G2b\_stage & 阶段识别 \\
+    图 G6 & G3\_radius & 半径数据、PCHIP 拟合与残差 \\
+    图 G7 & FIG-08\_fvm & 有限体积离散示意 \\
+    图 G8 & G4\_p1\_evolution & 问题1 温度与含水率演化 \\
+    图 G9 & FIG-16\_dimensionless & 无量纲数分析（$Bi_m$ 跨越 1） \\
+    图 G10 & FIG-18\_D\_contour & 扩散系数等值线 \\
+    图 G11 & G5\_p2\_radial & 问题2 前 3 h 径向分布 \\
+    图 G12 & G6\_p3\_threshold & 问题3 阈值通过时刻与终态 \\
+    图 G13 & G12\_max\_center\_surface & 中心/表面/最大值/平均四曲线 \\
+    图 G14 & G7\_p4\_moving\_boundary & 问题4 物理坐标与移动边界 \\
+    图 G15 & G9\_abc & A/B/C 顺序差分 \\
+    图 G16 & G11\_geo\_density & 几何—密度一致性诊断 \\
+    图 G17 & FIG-14\_bessel & 解析基准对比 \\
+    图 G18 & FIG-41\_adaptive & 自适应步长与迭代历史 \\
+    图 G19 & G8\_convergence & 基准误差与收敛阶 \\
+    图 G20 & G13\_tornado & 参数灵敏度龙卷风图 \\
+    图 G21 & G10\_scenario & 参数情景与区间 \\
+    图 G22 & G14\_robust & 数据扰动稳健性 \\
+    图 G23 & FIG-43\_latent & 潜热开关对照 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ==========================================================================
+\section{文献核验说明}
+\setcounter{table}{0}
+\label{sec:refnote}
+
+本项目在核实参考文献时发现：辅导材料给出的 21 个 DOI 中有
+\textbf{6 个指向错误的论文}（占 $29\%$）。正文参考文献中
+\textbf{4 条的 DOI 已更正}，凡引用必须回原文核实：
+
+\begin{itemize}[leftmargin=1.4em, itemsep=1pt]
+  \item Younsi 等 (2007) 原写 \texttt{\ldots thermalsci.2006.09.006}，
+        该 DOI 实为 Mahmud \& Fraser 2006 的另一文 $\to$ 已更正为
+        \texttt{\ldots 2006.09.001}；
+  \item Takhar 等 (2011) 原写 \texttt{\ldots jfoodeng.2011.01.026}，
+        该 DOI 实为 Romano 等 2011 激光背散射一文 $\to$ 已更正为
+        \texttt{\ldots 2011.05.006}；
+  \item Mercier 等 (2013) 原写 \texttt{\ldots jfoodeng.2013.03.030}，
+        该 DOI 实为 da Silva 等 2013 香蕉圆柱干燥一文 $\to$ 已更正为
+        \texttt{\ldots 2013.03.024}；
+  \item Champion 等 (2000) 原写 \texttt{10.1016/S0260-8774(00)00028-5}，
+        该 DOI 实为 Menkov 2000 扁豆种子吸湿等温线一文 $\to$ 已更正为
+        \texttt{10.1016/S0924-2244(00)00047-9}。
+\end{itemize}
+
+另有 1 条已\textbf{整条弃用}：辅导材料以
+\texttt{10.1016/S0017-9310(98)00229-8} 引用 Ni \& Datta (1999) 讨论辐射，
+但该 DOI 无效，反查到的同作者 1999 年论文主题为\textbf{油炸}，与原用途不符。
+
+\textbf{关于本文自算量}：附录2 与附录3 的 $D$ 在含水率方向的变化幅度
+（$266.2$ 倍与 $16.8$ 倍）为\textbf{本文计算}，题面未给出；
+引用时须写成``本文计算得到''，\textbf{不得}写成``题目给出 265 倍''。

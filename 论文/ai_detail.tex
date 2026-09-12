@@ -1,0 +1,197 @@
+% !TeX program = xelatex
+% ==========================================================================
+%  AI 工具使用详情
+%  依据《全国大学生数学建模竞赛人工智能工具使用规定》（2026 年试行）第 4 条：
+%  使用 AI 工具的参赛作品，应在支撑材料中包含本说明（PDF 格式，
+%  文件名为「AI 工具使用详情.pdf」）。
+%  编译：xelatex 两遍
+% ==========================================================================
+\documentclass[UTF8, a4paper, 11pt, fontset=windows]{ctexart}
+\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs, array, tabularx}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[colorlinks, linkcolor=black, urlcolor=blue]{hyperref}
+
+\captionsetup[table]{font=small, labelfont=bf, labelsep=quad}
+\renewcommand{\arraystretch}{1.15}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\small 2026 高教社杯全国大学生数学建模竞赛\quad A 题}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\section}{\bfseries\large}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\bfseries\normalsize}{\thesubsection}{0.6em}{}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries AI 工具使用详情}\\[4pt]
+  {\large 2026 高教社杯全国大学生数学建模竞赛\quad A 题：药材的烘干问题}
+\end{center}
+\vspace{4pt}
+
+\noindent 本说明依《全国大学生数学建模竞赛人工智能工具使用规定》（2026 年试行）
+第 4 条提供，逐项说明 AI 工具的名称、使用目的与环节、主要提示方式，
+以及对 AI 输出的采纳、人工修改与核验情况。
+
+% ==========================================================================
+\section{所用 AI 工具名称、版本或型号}
+
+\begin{table}[h]
+  \centering
+  \small
+  \begin{tabularx}{\textwidth}{@{}lXl@{}}
+    \toprule
+    工具 & 用途类别 & 使用方式 \\
+    \midrule
+    Claude（Anthropic，Claude Code 命令行工具） &
+      代码调试、数值结果核验、文献检索与出处核实、文字组织 &
+      竞赛期间交互式使用 \\
+    大语言模型对话界面 &
+      文献 DOI 反查、英文摘要语法检查 &
+      竞赛期间交互式使用 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\noindent\textbf{说明}：以上为通用大语言模型工具，未使用任何自动求解器、
+自动建模平台或端到端的 AI 智能体来生成模型与答案。
+
+% ==========================================================================
+\section{具体使用目的和环节}
+
+AI 工具\textbf{仅用于辅助性环节}，具体如下（按用途分列）：
+
+\subsection*{（1）代码调试与数值核验}
+
+\begin{itemize}[leftmargin=1.6em, itemsep=2pt]
+  \item 在自编求解程序运行结果异常时，辅助定位缺陷位置；
+  \item 对收敛阶、守恒量等数值指标做交叉核对；
+  \item 生成用于比对论文数值与结果文件的自动校验脚本。
+\end{itemize}
+
+\subsection*{（2）文献检索与出处核实}
+
+\begin{itemize}[leftmargin=1.6em, itemsep=2pt]
+  \item 依据辅导材料给出的 DOI，反查论文题名、作者与期刊是否匹配；
+  \item 对无法核实的外部数字做全文件检索，确认是否存在出处。
+\end{itemize}
+
+\subsection*{（3）文字组织与语言润色}
+
+\begin{itemize}[leftmargin=1.6em, itemsep=2pt]
+  \item 论文各章节的语句通顺性修改、术语统一；
+  \item 英文文献题录的格式整理。
+\end{itemize}
+
+\noindent\textbf{AI 工具未参与的环节}：物理模型与数学模型的建立、
+控制方程与边界条件的确定、数值格式的选择、判据口径的定义、
+参数取值的决策、以及全部四个问题的最终答案。
+
+% ==========================================================================
+\section{主要提示方式与使用过程说明}
+
+\subsection*{3.1 提示方式}
+
+采用\textbf{任务分解式提示}：每次只针对一个可独立核验的具体问题提问，
+并在提示中给出\textbf{可复现的最小上下文}（报错信息、输入数据、
+期望行为），不使用``帮我建模''``给出这题的答案''一类开放式提示。
+
+\subsection*{3.2 典型交互示例（节选）}
+
+\begin{enumerate}[leftmargin=1.8em, itemsep=4pt]
+  \item \textbf{代码缺陷定位}
+
+    \textit{提示要点}：给出``误差随步长加密的收敛阶被拟合为 $+29.19$，
+    而理论值为 $+2$''这一现象，附上阶数拟合的代码片段。
+
+    \textit{AI 输出}：指出拟合中使用了 $\log|t-t_{\text{ref}}|$，
+    而当数值解与参照解**逐位相同**时会取到 $\log 0$，
+    污染整条拟合直线。
+
+    \textit{处理}：经人工确认后改为\textbf{相邻差分比}求阶，
+    阶数恢复正常（$+1.63$ / $+2.20$）。
+
+  \item \textbf{文献 DOI 核实}
+
+    \textit{提示要点}：给出辅导材料中的 DOI 列表，要求核对题名与 DOI 是否指向同一篇论文。
+
+    \textit{AI 输出}：指出 21 个 DOI 中有 6 个指向错误的论文。
+
+    \textit{处理}：对其中 4 条通过 Crossref 反查得到正确的 DOI 并更正；
+    1 条因主题完全不符（用讲``油炸''的论文支撑``辐射''）而\textbf{整条弃用}。
+    该结果已写入论文附录 E。
+
+  \item \textbf{数值一致性校验}
+
+    \textit{提示要点}：要求把论文正文中出现的全部四位小数与
+    \texttt{result*.xlsx} 逐一比对。
+
+    \textit{AI 输出}：生成校验脚本，发现并定位了若干处
+    表头、列数、量纲口径的不一致。
+
+    \textit{处理}：逐条人工复核后修正；最终 25 项数值校验全部通过。
+\end{enumerate}
+
+% ==========================================================================
+\section{对 AI 输出的采纳、人工修改和核验}
+
+\subsection*{4.1 采纳原则}
+
+\textbf{凡 AI 输出的技术性结论，均要求给出可复现的判据后才予采纳}：
+或是一个能复现的最小反例，或是一段可运行并给出数值的代码，
+或是一条可反查的文献出处。\textbf{无法给出判据的输出一律不采纳。}
+
+\subsection*{4.2 人工修改与核验的主要情况}
+
+\begin{table}[h]
+  \centering
+  \small
+  \begin{tabularx}{\textwidth}{@{}lXc@{}}
+    \toprule
+    环节 & 核验方式 & 结论 \\
+    \midrule
+    物理模型与方程 & 由参赛队独立推导后与 AI 讨论对照 & 自主确定 \\
+    数值结果 & 全部由自编程序计算；AI 仅参与调试 & 自主计算 \\
+    收敛阶与守恒量 & 人工复核判据与参照解选取 & 逐项复核 \\
+    文献引用 & 每条 DOI 人工反查题名与主题是否匹配 & 已核实 \\
+    论文文字 & 全部经人工改写，术语与口径统一 & 已改写 \\
+    最终答案 & 由结果文件唯一确定，不经 AI 生成 & 可溯源 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection*{4.3 已发现并纠正的 AI 辅助错误（如实记录）}
+
+使用 AI 辅助的过程本身也产生过错误，均已被发现并纠正，如实记录如下：
+
+\begin{enumerate}[leftmargin=1.8em, itemsep=2pt]
+  \item \textbf{脚本转义事故}：用脚本批量修改源文件时，
+    \verb|\noindent|、\verb|\texttt| 中的 \verb|\n|、\verb|\t|
+    被当成转义字符，产生控制字符并损坏文件。已改为直接编辑并全文复查控制字符。
+  \item \textbf{台账覆盖事故}：数据扰动实验的台账合并逻辑写成``按本次作业表过滤''，
+    导致只重跑 3 个样本时把其余 60 条历史记录一并丢弃。
+    已改为\textbf{按编号并集合并}，并把该事故写入代码注释。
+  \item \textbf{参考点取错}：几何—密度诊断量的基准取了第一条输出行的值，
+    而该行并不是初始时刻，导致诊断量符号相反。
+    已改用初值均匀时的闭式解，并加了断言守住。
+\end{enumerate}
+
+\noindent 以上三处均为\textbf{在核验中被发现}，说明`逐项人工审查与核实'的要求
+在本参赛队得到了落实；相应的修法与理由均保留在支撑材料的代码注释中。
+
+\subsection*{4.4 核心成果的自主性声明}
+
+本文的\textbf{核心建模与分析由参赛队主导}：
+问题的物理抽象、控制方程与边界条件的建立、有限体积离散格式与时间推进格式的选择、
+四个问题的判据口径定义、以及全部数值实验的设计与结论，
+均由参赛队自主完成并对结果负责。
+AI 工具的作用限于上列辅助性环节，其输出经逐项人工审查与核实后方被采用。
+
+\end{document}

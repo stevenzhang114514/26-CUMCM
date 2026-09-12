@@ -1,0 +1,430 @@
+\section{模型检验}
+
+本章对模型做五类检验：解析基准、收敛性、守恒收支、退化一致性、
+以及灵敏度与稳健性。\textbf{误差分析的口径}在本章开头单独声明。
+
+% ==========================================================================
+\subsection{误差分析口径：为什么本文不报 RMSE / MAPE / $R^2$}
+
+本文求解的是\textbf{正向偏微分方程的定解问题}，而非拟合、回归或机器学习问题。
+因此本文\textbf{不报告} RMSE / MAPE / $R^2$ 等面向``预测值—观测值''配对的
+统计指标，理由有三：
+
+\begin{enumerate}[leftmargin=2.2em, itemsep=2pt]
+  \item \textbf{RMSE 需要「观测—预测」配对，本题没有内部观测。}
+        附件1 是\textbf{边界条件}，药材内部的 $T(r,t)$、$C(r,t)$ 场题目
+        \textbf{没有给任何实测值}；若强行计算，唯一可用的``观测''只能是更细网格的
+        自算解，那是\textbf{离散误差}而非模型误差，重复报告会造成``已独立验证''的误读。
+  \item \textbf{MAPE 有除零风险，且与问题错配。}
+        末期含水率趋近 $\Cinf\approx0.05$，增量形式的分母直接趋零；
+        更根本的是 MAPE 把 57.49 h 里 3400 多个输出时刻\textbf{等权平均}，
+        于是``阈值穿越早了 20 s''被摊薄到 $10^{-4}$ 量级——
+        而它恰恰是本题全部要回答的内容。
+  \item \textbf{$R^2$ 在单调趋势数据上恒接近 1，没有分辨力。}
+        含水率从 2.55 单调降到 0.05，$SS_{tot}$ 极大，
+        \textbf{任意一条单调下降的光滑曲线}都能拿到 $R^2>0.99$。
+\end{enumerate}
+
+本文实际使用的五层精度度量见 \S\ref{sec:errbudget} 的误差预算总表。
+关于``残差图''：正向问题的残差本就应趋近 0，它用于\textbf{验证收敛}而非
+\textbf{发现模式}；其正确对应物是\textbf{误差—步长双对数图}、
+\textbf{离散方程残差随迭代的下降史}与\textbf{解析基准的残差沿 $r$ 分布}。
+
+% ==========================================================================
+\subsection{解析基准（Bessel 级数）}
+
+问题1 的温度方程是线性、常系数，存在解析解（Bessel 级数）。
+验证条件：固定热物性（$\rho=820$、$c_p=2600$、$k=0.36$）、关闭蒸发、
+恒定环境温度 $T_\infty=50\ ^\circ\mathrm{C}$。
+
+\begin{itemize}[leftmargin=1.6em, itemsep=2pt]
+  \item $Bi=1.3889$；
+  \item 前 5 个 Bessel 特征值：$1.4185$、$4.1665$、$7.2085$、$10.3083$、$13.4272$；
+  \item 各时刻最大绝对误差：$t=60$ s $\to1.179\times10^{-3}\ ^\circ$C；
+        $t=300$ s $\to1.077\times10^{-3}\ ^\circ$C；
+        $t=900$ s $\to3.086\times10^{-4}\ ^\circ$C；
+        $t=1800$ s $\to4.962\times10^{-4}\ ^\circ$C；
+  \item 项数自检（30 项 vs 60 项）最大差 $7.105\times10^{-15}\ ^\circ$C（机器精度）。
+\end{itemize}
+
+\textbf{结论}：数值解与解析解的最大误差约 $0.001\ ^\circ\mathrm{C}$，
+相对误差 $<0.002\%$。数值方法验证通过。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth]{FIG-14_bessel.png}
+  \caption{解析基准：Bessel 级数与数值解对照}
+  \label{fig:FIG14}
+\end{figure}
+
+% ==========================================================================
+\subsection{网格与时间收敛性}
+
+\textbf{空间收敛}（均匀网格，时间固定 $\Delta t=1$ s，$t=3$ h）：
+
+\begin{table}[H]
+  \centering
+  \caption{空间收敛（均匀网格，参照解 $N=320$）}
+  \label{tab:convS}
+  \footnotesize
+  \begin{tabular}{@{}lccc@{}}
+    \toprule
+    观测量 & 相邻网格误差比 & 拟合阶 & 期望 \\
+    \midrule
+    中心温度 $T(0,t)$ & $4.20\to5.00$ & $+2.197$ & $+2$ \\
+    中心含水率 $C(0,t)$ & $4.20\to5.00$ & $+2.196$ & $+2$ \\
+    全域最大值 $\Cmax$ & $4.20\to5.00$ & $+2.196$ & $+2$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\textbf{空间二阶}，与半控制体 FVM $+$ 调和平均界面导数的理论阶一致。
+
+\begin{quote}
+  横轴是\textbf{步长 $h$}，故斜率是 $+2$；只有横轴取 $1/h$ 或网格数 $N$ 时才是 $-2$。
+\end{quote}
+
+\textbf{时间收敛}（生产网格 $N=200$、$\gamma=1.5$，Backward Euler）：
+
+\begin{table}[H]
+  \centering
+  \caption{时间收敛（生产网格，参照解 $\Delta t=2.5$ s）}
+  \label{tab:convT}
+  \footnotesize
+  \begin{tabular}{@{}lccc@{}}
+    \toprule
+    观测量 & 相邻时间步误差比 & 拟合阶 & 期望 \\
+    \midrule
+    中心温度 & $2.67\to2.46\to3.10$ & $+1.434$ & $+1$ \\
+    中心含水率 & $2.15\to2.33\to3.00$ & $+1.294$ & $+1$ \\
+    全域最大值 & $2.15\to2.33\to3.00$ & $+1.294$ & $+1$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{quote}
+  \textbf{收敛阶只能向下取，不能向上取。}
+  拟合阶 $1.29\sim1.43$ \textbf{高于} Backward Euler 的理论一阶，
+  原因是\textbf{末点已被参照解自身的离散误差污染}（误差地板）。
+  本项目\textbf{不据此声称``时间二阶''}，Backward Euler 就是一阶。
+\end{quote}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth]{FIG-41_adaptive.png}
+  \caption{自适应时间步长与非线性迭代历史}
+  \label{fig:FIG41}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth]{G8_convergence.png}
+  \caption{数值验证：解析基准误差与空间收敛阶（双对数坐标，斜率即阶）}
+  \label{fig:G8}
+\end{figure}
+
+% ==========================================================================
+\subsection{$t_*$ 的误差三分量}
+\label{sec:tstar-err}
+
+\begin{table}[H]
+  \centering
+  \caption{$\tstar$ 的离散误差}
+  \label{tab:tstarerr}
+  \footnotesize
+  \begin{tabular}{@{}lccl@{}}
+    \toprule
+    误差来源 & 量级 & 估计方法 & 判定 \\
+    \midrule
+    事件定位（二分） & $0.5$ ms & 二分容差一半 & 可忽略 \\
+    时间离散 & $1.86$ s & Richardson 从粗侧外推 & 可忽略 \\
+    \textbf{空间离散} & $\mathbf{17.4}$ s & $N=150\to200$ 误差比 $2.69$ 反推 &
+      \textbf{主导项}，故 $\tstar$ 只报 2 位小数 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+时间离散误差用\textbf{从粗侧逼近}估计：Backward Euler 的步数
+$\propto1/\sqrt{a_{tol}}$，放松容差省机时，而 Richardson 外推只需要误差的\textbf{比值}。
+
+% ==========================================================================
+\subsection{守恒与通量收支}
+
+\begin{table}[H]
+  \centering
+  \caption{守恒与通量收支检验}
+  \label{tab:conserv}
+  \footnotesize
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    检验项 & 结果 & 来源 \\
+    \midrule
+    内部界面通量望远镜求和泄漏 & $1.782\times10^{-16}$（机器精度） & 独立复核 \\
+    算子装配 vs 通量循环最大相对差 & $4.278\times10^{-12}$ & 独立实现 \\
+    水分积分收支最大相对误差 & $4.951\times10^{-5}$ & 独立复核 \\
+    温度积分收支最大相对误差 & $1.263\times10^{-4}$ & 独立复核 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\textbf{结论}：内部界面通量成对抵消达机器精度；水分和温度的积分收支误差 $<0.001\%$。
+
+\begin{quote}
+  本检验是\textbf{所解方程}的积分收支，不是完整热力学能量守恒。
+  变物性模型不宜直接把 $\rho c_p\Delta T$ 当作完整内能变化。
+  口径：单位轴向长度，$A_{surf}=2\pi R_0=0.125664$ m。
+\end{quote}
+
+% ==========================================================================
+\subsection{五项退化与一致性检验}
+\label{sec:degrade}
+
+\begin{table}[H]
+  \centering
+  \caption{五项退化与一致性检验}
+  \label{tab:degrade}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{@{}clXc@{}}
+    \toprule
+    \# & 检验 & 结果 & 通过 \\
+    \midrule
+    1 & 问题2 $\to$ 问题1
+      & 固定热物性 $+$ $D$ 换附录2 $+$ 统一初值/边界/传递系数：
+        两条路径（单向耦合 vs 双向耦合）结果\textbf{一致到 4 位小数} & 是 \\
+    2 & 问题4 固定半径
+      & 保留附录4 物性、$R\equiv R_0$ $\to$ 退化为 B 方案：
+        $120$ h 未达标，与独立计算的 B 方案一致 & 是 \\
+    3 & 纯导热解析基准 & 固定物性 $+$ 关闭蒸发 $+$ 满足解析解边界：
+        误差 $<0.001\ ^\circ$C & 是 \\
+    4 & 坐标变换一致性
+      & 材料导数形式 $\leftrightarrow$ 固定坐标 $+$ 坐标项：理论上等价，
+        数值上 $R\equiv R_0$ 时逐点退化 & 是 \\
+    5 & 物理合理性 & $C\ge0$、中心对称、无过冲：全部通过 & 是 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\textbf{第 2 项说明}：固定半径 $+$ 保留附录4 物性，应退化为 B 方案。
+数值实验确认：B 方案在 $120$ h 内未达标（$120$ h 时 $\Cmax=0.1571$），
+而问题4（收缩）在 $51.09$ h 达标。详细对照见 \S\ref{sec:abc}。
+
+\textbf{第 1 项的补充说明}：该项检验的是\textbf{同一套实现内部}
+单向耦合与双向耦合两条路径的一致性。
+此外，本文还把另一套独立实现的 MATLAB 问题4 代码\textbf{逐行移植}为 Python 并运行同一配置，
+得到 $\tdry=73.033$ h，与该实现报告的 $73.03$ h 相差
+$\mathbf{+11}$ \textbf{s}（$0.004\%$）——
+这是\textbf{跨语言实现的一致性证据}：后续一切单因素扰动结论
+\textbf{建立在该实现自己的格式之上}，不是``我另写了一个模型所以当然不一样''。
+
+% ==========================================================================
+\subsection{参数灵敏度与情景区间}
+
+\subsubsection*{（1）三档小扰动与灵敏度系数}
+
+原稿只做了 $\times0.5$ 与 $\times2$ 两档（即 $-50\%$ 与 $+100\%$），
+不足以支撑``灵敏度系数''这一\textbf{局部量}。本节补做
+$\pm5\%$、$\pm10\%$、$\pm20\%$ 三档，并另补 $\pm50\%$、$+100\%$ 于同一批计算。
+全部 28 次运行共用\textbf{完全相同的}网格（$N=200$、$\gamma=1.5$）与时间容差，
+基准值复现交付结果（$57.488876$ h 对冻结值 $57.4889$ h）。
+
+\begin{table}[H]
+  \centering
+  \caption{灵敏度系数 $S=(\Delta Y/Y)/(\Delta P/P)$，$Y=\tstar$}
+  \label{tab:S}
+  \footnotesize
+  \begin{tabular}{@{}lcccc@{}}
+    \toprule
+    参数 & $S$（$\pm5\%$） & $S$（$\pm10\%$） & $S$（$\pm20\%$）
+         & $\pm20\%$ 半幅 $\lvert\Delta\tstar\rvert$ \\
+    \midrule
+    $\boldsymbol{D}$ & $\mathbf{-0.886}$ & $\mathbf{-0.893}$ & $\mathbf{-0.922}$ & $\pm\mathbf{10.6003}$ h \\
+    $h_m$ & $-0.113$ & $-0.114$ & $-0.119$ & $\pm1.3667$ h \\
+    $h$ & $-0.0014$ & $-0.0014$ & $-0.0014$ & $\pm0.0164$ h \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+敏感度排序在全部五个扰动档下均为 $D\gg h_m\gg h$，
+$\pm20\%$ 半幅分别为 $10.60$ h、$1.37$ h、$0.016$ h，相差 $1\sim3$ 个数量级。
+
+\begin{quote}
+  \textbf{必须声明的口径}：灵敏度系数是\textbf{局部量}。
+  本文实测 $\lvert S_D\rvert$ 在 $\pm5\%$ 处为 $0.886$，
+  而在 $-50\%$ 处升至 $\mathbf{1.794}$ —— \textbf{相差一倍}。
+  故本文报 $S_D\approx-0.89$（$\pm5\%\sim\pm10\%$），并同时给出各档取值，
+  \textbf{不以单一大扰动档的值代表``灵敏度系数''}。
+\end{quote}
+
+\textbf{$D$ 的响应呈显著不对称}：$D$ 增大 $100\%$ 使 $\tstar$ 缩短 $43.4\%$，
+而 $D$ 减小 $50\%$ 使 $\tstar$ 延长 $89.7\%$。
+其机理是\textbf{传质毕渥数 $Bi_m=h_mR_0/D$ 在本工况由 1.19 升到 47.7、
+过程中跨越 1}：$D$ 增大时过程转向表面阻力控制，继续增大 $D$ 收效递减；
+$D$ 减小时过程转向内部扩散控制，$\tstar$ 急剧变长。
+这同时解释了为何 $h_m$ 的灵敏度虽小却\textbf{不为零}
+（$S_{h_m}\approx-0.11$）——文献报道的 $S_{h_m}<0.03$ 以其 $Bi_m\gg1$ 为前提，
+而本工况初期 $Bi_m\approx1.19$，内外阻力相当，该前提\textbf{不成立}。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{G13_tornado.png}
+  \caption{参数灵敏度。(a) 龙卷风图（三档嵌套）；
+           (b) 响应曲线与 $\pm5\%$ 处线性外推（点线）——
+           实测在 $\lvert\delta\rvert\ge20\%$ 处系统性偏离线性；
+           (c) 灵敏度系数随档位变化（纵轴 symlog）}
+  \label{fig:G13}
+\end{figure}
+
+\subsubsection*{（2）与文献的对照}
+
+\begin{table}[H]
+  \centering
+  \caption{灵敏度结论与文献的对照}
+  \label{tab:lit}
+  \footnotesize
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    文献结论 & 本项目实测 & 判定 \\
+    \midrule
+    $S_D\approx0.65\sim0.78$（$D$ 最敏感）[R4-F21]
+      & $S_D\approx-0.89$，排序第一且遥遥领先 & \textbf{证实}（量级同阶，本项目略高） \\
+    $S_{h_m}<0.03$（$h_m$ 最不敏感）[R4-F21]
+      & $S_{h_m}\approx-0.11$，是 $S_h$ 的 80 倍 & \textbf{证伪}（前提 $Bi_m\gg1$ 不成立） \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection*{（3）三种区间分开命名}
+
+\begin{table}[H]
+  \centering
+  \caption{三种区间严格分开}
+  \label{tab:intervals}
+  \footnotesize
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    类型 & 本项目是否给出 & 值 \\
+    \midrule
+    \textbf{情景区间} & 给出
+      & 参数倍率：$\tstar\in[32.53,109.06]$ h；环境外推：$[56.95,57.87]$ h \\
+    \textbf{参数扰动分位区间} & 给出（仅 $D$ 一维）
+      & 5\%$\sim$95\% 分位：$\tstar\in[43.48,77.21]$ h \\
+    \textbf{数据扰动分位区间} & 给出（见 \S\ref{sec:robust}）
+      & 见 表 \ref{tab:robust} \\
+    \textbf{统计置信区间} & \textbf{不给} & 本工况没有批次测量数据 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{quote}
+  三者\textbf{不得混称}，尤其\textbf{不得把情景区间说成置信区间}。
+\end{quote}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{G10_scenario.png}
+  \caption{参数情景与区间}
+  \label{fig:G10}
+\end{figure}
+
+% ==========================================================================
+\subsection{稳健性检验：删数据 / 加噪声 / 换算法}
+\label{sec:robust}
+
+为检验结论对数据质量的依赖，本文对附件1 做三类扰动，每类独立重算
+（共 63 次运行，基准 $57.488876$ h）：
+
+\begin{table}[H]
+  \centering
+  \caption{数据扰动稳健性结果}
+  \label{tab:robust}
+  \footnotesize
+  % C 行的三个数值串很长：原样排版时整表超出 \textwidth 55.9 pt（居中后左右各压出
+  % 约 5 mm）。收紧列间距并去掉斜杠两侧的空格即可容下（实测），
+  % 且**不增加行数** —— 这一点要紧：正文上限是 30 页，C 行一旦折行就会多出一页。
+  \setlength{\tabcolsep}{2.5pt}
+  \begin{tabular}{@{}llcccc@{}}
+    \toprule
+    扰动 & $n$ & 均值 $\tstar$ / h & $\sigma$ / s & 相对 & 极差 / s \\
+    \midrule
+    \textbf{A 随机删 10\%}（24/241 点） & 20 & 57.487533 & $\mathbf{30.0}$ & 0.015\% & 109.7 \\
+    \textbf{B1 量化噪声}（附件末位精度） & 20 & 57.488872 & $\mathbf{0.22}$ & 0.0001\% & 0.8 \\
+    \textbf{B2 传感器噪声}（假定 $\sigma_T$=0.1 $^\circ$C） & 20 & 57.483436 & $\mathbf{67.6}$ & 0.033\% & 192.6 \\
+    \textbf{C 换插值算法} & 3 & PCHIP\,57.488876/SG\,57.489064/线性\,57.488871
+      & --- & 差 $\mathbf{<0.7}$ s & --- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+三点结论：
+
+\textbf{① 附件1 的记录精度不构成误差来源。}
+量化噪声引起的散布为 $0.22$ s（$1\sigma$）/ $0.45$ s（$2\sigma$），
+比时间离散误差（$1.86$ s）小 $4\sim8$ 倍，
+比空间离散误差（$17.4$ s）小 $39\sim78$ 倍，\textbf{不可分辨}。
+附件1 给到 $T$ 的 3 位小数是\textbf{够用的}。
+
+\textbf{② 换插值算法不影响结论。} 三种算法给出的 $\tstar$ 相差不到 1 秒。
+
+\textbf{③ ★ 数据扰动的影响经由``平台均值''单一渠道传递。}
+对 20 个删除样本做回归，$\Delta\tstar/\Delta T_\infty=-1.850$ h/$^\circ$C，
+\textbf{相关系数 $r=-0.9997$}；平台温度仅变动约 $0.016\ ^\circ$C
+即决定了全部散布。\textbf{而长时平台取值本就是必须假定的量}——
+其取法差异（4 档极差 $1090$ s）比本节全部数据扰动的总和（最大 $135$ s）
+还大 \textbf{8 倍}。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{G14_robust.png}
+  \caption{数据扰动稳健性。(a) 三组扰动下 $\tstar$ 的分布
+           （空心圆为需放宽步长下限的 3 个删除样本）；
+           (b) 各项误差与散布的量级对比——\textbf{平台窗口取法一项
+           大于全部数据扰动之和}}
+  \label{fig:G14}
+\end{figure}
+
+\begin{quote}
+  \textbf{命名纪律（必须保留）}：上表三组扰动给出的散布为
+  \textbf{「数据扰动分位区间」}，\textbf{不是统计置信区间}。
+  附件1 是每 60 s 一条的\textbf{确定性采样时间表}，非随机样本；
+  该散布刻画的是结果对\textbf{数据点集合}的敏感度，
+  不含批次间真实变差（后者本文无数据）。\\
+  \textbf{一处必须如实报告的异常}：20 个删除样本中有 3 个因删点后
+  插值曲线局部变陡、触发生产步长下限（$\Delta t_{\min}=10^{-4}$ s）而无法求解；
+  这 3 个样本改用放宽的 $\Delta t_{\min}=10^{-7}$ s 解出，
+  其 $\tstar$ 均落在其余样本的分布范围内，
+  $\sigma$ 从 $0.00683$ h 变为 $0.00834$ h（$+22\%$），\textbf{结论方向不变}。
+\end{quote}
+
+% ==========================================================================
+\subsection{误差预算总表}
+\label{sec:errbudget}
+
+把本文所有已知的误差与散布项放在同一尺度上：
+
+\begin{table}[H]
+  \centering
+  \caption{误差预算总表}
+  \label{tab:budget}
+  \footnotesize
+  \begin{tabular}{@{}llc@{}}
+    \toprule
+    项 & 量级 / s & 来源 \\
+    \midrule
+    事件定位（二分收敛） & $0.0005$ & \S\ref{sec:tstar-err} \\
+    B1 量化噪声（$2\sigma$） & $0.45$ & \S\ref{sec:robust} \\
+    换插值算法（PCHIP/SG/线性） & $0.7$ & \S\ref{sec:robust} \\
+    时间离散（$\tstar$） & $1.86$ & \S\ref{sec:tstar-err} \\
+    \textbf{空间离散（$\tstar$，数值主导）} & $\mathbf{17.4}$ & \S\ref{sec:tstar-err} \\
+    A 删 10\% 数据（$2\sigma$） & $60.0$ & \S\ref{sec:robust} \\
+    B2 传感器噪声（$2\sigma$） & $135.2$ & \S\ref{sec:robust} \\
+    \textbf{平台窗口取法（4 档极差）} & $\mathbf{1090}$ & \S\ref{sec:tstar-precision} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{quote}
+  \textbf{本文的可信度瓶颈在建模约定，而非数据质量。}
+  最大的两项是\textbf{长时环境平台的取法}（$1090$ s）与\textbf{空间离散}
+  （$17.4$ s），而所有数据扰动加起来都超不过 $135$ s。
+  这也正是本文把``精度口径声明''写进正文（\S\ref{sec:tstar-precision}）的原因。
+\end{quote}

@@ -1,0 +1,181 @@
+\section{问题2：整个烘干过程}
+
+\subsection{模型建立}
+
+问题2 求解\textbf{整个烘干过程}，从 $t=0$ 起统一采用附录3 的变物性经验公式：
+\begin{equation}
+  \rho(C)c_p(C)\frac{\partial T}{\partial t}
+  =\frac{1}{r}\frac{\partial}{\partial r}\!\left(k(C)\,r\frac{\partial T}{\partial r}\right),
+  \quad
+  \frac{\partial C}{\partial t}
+  =\frac{1}{r}\frac{\partial}{\partial r}\!\left(D(C,T)\,r\frac{\partial C}{\partial r}\right),
+\end{equation}
+\begin{equation}
+  D=2.4\times10^{-3}\exp\!\left(-\frac{0.45}{C}\right)
+    \exp\!\left[-\frac{3850}{T+273.15}\right]\quad[\mathrm{m^2/s}] .
+\end{equation}
+
+\textbf{题面明确``为简化问题，相关经验公式统一采用附录3''}，
+故从 $t=0$ 起就用附录3，\textbf{不存在阶段切换}，也不需要``切换处保持状态连续''的处理。
+
+\textbf{双向耦合}：$D$ 依赖 $T$，水分场不再独立，$T$ 与 $C$ 必须\textbf{联立求解}。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth]{FIG-16_dimensionless.png}
+  \caption{无量纲数分析。(a) $Bi_m$ 由 1.19 升到 47.7，\textbf{过程中跨越 1}；
+           (b) 传质特征时间比传热大 1$\sim$2 个数量级}
+  \label{fig:FIG16}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\textwidth]{FIG-18_D_contour.png}
+  \caption{附录2/3/4 的扩散系数 $D(C,T)$ 等值线与本文工况轨迹（三者色标范围相同）}
+  \label{fig:FIG18}
+\end{figure}
+
+\subsection{边界外推与敏感性}
+
+长时环境边界的处理方案见 \S5.3。本节做情景扫描检验其影响：
+
+\begin{table}[H]
+  \centering
+  \caption{环境外推情景对 $\tstar$ 的影响}
+  \label{tab:envsens}
+  \footnotesize
+  \begin{tabular}{@{}lccc@{}}
+    \toprule
+    情景 & $\tstar$ / h & $\Delta$ vs 基线 & 相对 \\
+    \midrule
+    基线（$t_{pre}=14400$ s、$T_\infty=50.0017\ ^\circ$C、$\Cinf=0.049998$） & 57.49 & --- & --- \\
+    $t_{pre}=9600$ s & 57.49 & $\approx0$ & $\approx0$ \\
+    $T_\infty=49.8\ ^\circ$C & 57.87 & $+0.39$ h & $+0.67\%$ \\
+    $T_\infty=50.3\ ^\circ$C & 56.95 & $-0.54$ h & $-0.94\%$ \\
+    $\Cinf=0.0495$ & 57.48 & $-0.01$ h & $-0.02\%$ \\
+    $\Cinf=0.0505$ & 57.50 & $+0.01$ h & $+0.02\%$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\textbf{由环境外推得到的情景区间}：$\tstar\in[56.95,57.87]$ h $=[2.373,2.411]$ 天
+（$\pm0.8\%$）。$t_{pre}$ 的取值对结果\textbf{没有影响}——
+因为 PCHIP 数据段与平台值本身是连续过渡的。
+
+\textbf{环境平台窗口的选择影响}：本文取 $t\ge9600$ s 段（$n=81$）均值。
+若改取 $t\ge12400$ s 段，$\tstar$ 会从 $57.4889$ h 变到 $57.4747$ h，
+跨度约 $0.03$ h。这属于\textbf{建模约定不同}，不是模型或算法误差。
+完整的口径对照见 \S\ref{sec:tstar-precision}。
+
+\subsection{数值方法}
+
+问题2 在问题1 内核基础上做两项扩展：
+
+\textbf{（1）变物性走守恒形式}。面导热系数 $k$ 用调和平均、
+热容 $(\rho c_p)$ 用单元值，\textbf{二者不可合并}。
+若令 $\Gamma=k/(\rho c_p)$ 再走原路径，等于把两者在同一个面上一起做调和平均，
+$\rho c_p$ 沿 $r$ 变化数倍时会产生明显偏差。
+守恒形式的能量方程应写成
+\begin{equation}
+  \left(\rho c_p\right)_i V_i\frac{T_i^{n+1}-T_i^{n}}{\Delta t}
+  =\sum_{j} G_{ij}\left(T_j^{n+1}-T_i^{n+1}\right)
+  +\ \text{边界项},
+\end{equation}
+即 $\rho c_p$ \textbf{整体}除以 $(\rho c_p)_i V_i$，而不是把 $k$ 与 $c_p$ 分别处理。
+
+\textbf{（2）块 Picard 用 Gauss--Seidel 序}。$\rho c_p$、$k$ 对 $C$ 的依赖是单向的，
+用最新 $C$ 可显著加快收敛且不破坏任何子问题的 M-矩阵性质。
+
+\textbf{残差判据不可省}：只查更新量会落入``更新量变小但残差停滞''的陷阱；
+本文的\textbf{双重判据}对 $T$、$C$ 两个场同时成立才算收敛。
+
+\textbf{网格与时间}：生产网格 $N=200$、$\gamma=1.5$，$\theta=1$（Backward Euler），
+自适应步长，输出时刻精确落点。3 h 正式版接受步 12652 次、拒绝步 4 次，
+平均 3.00 次 Picard 迭代。
+
+\subsection{结果}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\textwidth]{G5_p2_radial.png}
+  \caption{问题2 前 3 h 的径向分布}
+  \label{fig:G5}
+\end{figure}
+
+\textbf{温度场}：前 3 h 内整体升温到接近烘房温度；
+$t=3$ h 时中心 $49.8494\ ^\circ\mathrm{C}$、表面 $49.9666\ ^\circ\mathrm{C}$，
+表面略高于中心，符合热风加热过程。
+
+\textbf{含水率场}：前 3 h 内含水率显著下降但远未达终点；
+$t=3$ h 时中心 $1.7662$ kg/kg、表面 $1.0081$ kg/kg，表面先干、中心后干。
+
+\input{tables/tab3}
+\input{tables/tab4}
+
+完整结果见 \texttt{result2.xlsx}。
+
+\subsection{与问题1 的差异分析}
+
+问题2 相比问题1 有三项扩展：\textbf{变物性}（$D$ 含 Arrhenius 温度依赖，
+方程强非线性）、\textbf{双向耦合}（$T$ 与 $C$ 必须联立）、
+\textbf{全流程边界}（跨越 2--3 天）。
+
+在 $t=1800$ s 处，双向耦合使中心温度降低约 $\mathbf{1.386\ ^\circ C}$
+（问题1 为 $33.5763\ ^\circ\mathrm{C}$；问题2 为 $32.1902\ ^\circ\mathrm{C}$）。
+\textbf{这属于模型差异分析，不是两套实现必须相等的正确性验证。}
+
+\textbf{差异方向值得注意}：表面上附录3 的 $D$ 在 $30\ ^\circ\mathrm{C}$ 附近
+反而略大于附录2（$D_{\text{app3}}(2.55,30\ ^\circ\mathrm{C})=5.64\times10^{-9}$
+对 $D_{\text{app2}}(2.55)=4.94\times10^{-9}$），\textbf{本应干燥更快}；
+但实测问题2 \textbf{更冷、更湿}。原因正是\textbf{双向耦合}：
+
+\begin{itemize}[leftmargin=1.6em, itemsep=2pt]
+  \item 附录3 的 $\rho c_p$ 更大、$k$ 更高，热扩散率\textbf{低 14\%} $\to$ 升温更慢；
+  \item 而 $D$ 含 Arrhenius 因子 $\exp(-3850/T_K)$（约 $4\%/\mathrm{K}$），
+        温度偏低又\textbf{反馈}压低扩散系数。
+\end{itemize}
+
+这正是``问题1 可以先水后温、问题2 必须联立''的直接数值体现。
+
+作为对照，M1 在 M0 基础上开启蒸发潜热后，前 3 h 中心温度额外降低
+$18.06$ K；M1 为\textbf{条件性扩展，不改变问题2 的正式答案}（见 \S\ref{sec:M1}）。
+
+\subsection{特征时间与物性公式的定量比较}
+
+取初始状态（$T=28\ ^\circ\mathrm{C}$，$C=2.55$ kg/kg）估算特征时间：
+\begin{equation}
+  \tau_T=\frac{R_0^{2}}{\alpha}\approx2761.9\ \mathrm{s}\approx46.0\ \mathrm{min},
+  \qquad
+  \tau_m=\frac{R_0^{2}}{D}\approx7.09\times10^{4}\ \mathrm{s}\approx19.7\ \mathrm{h}.
+\end{equation}
+因此前 3 h 温度已接近平衡，水分仍在缓慢扩散，整个烘干过程由水分扩散主导。
+
+\textbf{关于``265 倍''的说明}：本文按附录公式计算得到附录2、附录3、附录4 的
+$D(C)$ 在水分浓度方向上的变化幅度分别为 \textbf{266.2 倍}、\textbf{16.8 倍}、
+\textbf{6.6 倍}。\textbf{题面并未出现``265 倍''这一比值}，
+该数是本文根据附录数据计算的结果，引用时须写成``本文计算得到''，
+\textbf{不得}写成``题目给出''。
+
+\subsection{完整过程的物理本质：恒温干燥}
+
+由时间尺度分析可知，传质特征时间随工况变化很大：
+
+\begin{table}[H]
+  \centering
+  \footnotesize
+  \begin{tabular}{@{}lcc@{}}
+    \toprule
+    工况 & $\tau_m=R_0^2/D$ / h & $\tau_m/\tau_T$ \\
+    \midrule
+    $T=28\ ^\circ$C，$C=2.55$ & 19.7 & $\approx26$ \\
+    $T=50\ ^\circ$C，$C=2.55$ & 8.2 & $\approx11$ \\
+    $T=50\ ^\circ$C，$C=0.15$ & 139 & $\approx181$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+约 4$\sim$5 个传热时间常数（$\approx3.5$ h）内温度场就基本平衡，
+之后是长达约 \textbf{54 h 的恒温干燥}，温度不再是限制因素。
+\textbf{整个``2--3 天''的时长由水分扩散单独决定。}
+这解释了``预热平衡 $+$ 恒温干燥''两阶段的自然划分，
+也说明恒温段的边界设定对 $\tstar$ 的影响远大于对温度场的影响。

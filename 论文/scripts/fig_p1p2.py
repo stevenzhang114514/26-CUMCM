@@ -209,7 +209,7 @@ def fig_FIG18():
         m = np.isfinite(D) & (D > 0)
         pc = ax.pcolormesh(CC, TT, np.where(m, D, np.nan),
                            norm=LogNorm(vmin=1e-16, vmax=1e-3),
-                           cmap="BuPu", shading="auto")
+                           cmap="BuPu", shading="auto", rasterized=True)   # 矢量会膨胀到 8.5 MB
         cb = fig.colorbar(pc, ax=ax, pad=0.02)
         cb.set_label("$D$ / (m$^2$/s)", fontsize=9)
         cb.ax.yaxis.set_major_formatter(

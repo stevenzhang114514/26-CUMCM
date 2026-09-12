@@ -6,7 +6,8 @@
 \documentclass[UTF8, a4paper, 11pt, fontset=windows]{ctexart}
 
 % ---------------- 页面 ----------------
-\usepackage[top=2.5cm, bottom=2.5cm, left=2.6cm, right=2.6cm]{geometry}
+% 规范第一条：A4、上下左右各留至少 2.5 cm 页边距
+\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
 \usepackage{fancyhdr}
 \usepackage{titlesec}
 
@@ -38,15 +39,23 @@
 \usepackage{enumitem}
 \usepackage{caption}
 \usepackage{siunitx}
-\usepackage{algorithm2e}
+
+% ---------------- 算法伪代码（附录 B）----------------
+\usepackage[ruled, vlined, linesnumbered]{algorithm2e}
+\SetAlgorithmName{算法}{算法}{算法索引}
+\DontPrintSemicolon
+\SetKwComment{Comment}{// }{}          % \Comment*[r]{...} 右对齐旁注
+\SetKwInOut{Input}{输入}
+\SetKwInOut{Output}{输出}
+\setlength{\algomargin}{2.2em}
 
 % ==========================================================================
 %  样式
 % ==========================================================================
-\captionsetup[figure]{font=small, labelfont=bf, labelsep=quad, skip=4pt}
-\captionsetup[table]{font=small, labelfont=bf, labelsep=quad, skip=4pt}
-\renewcommand{\arraystretch}{1.18}
-\setlength{\parskip}{2pt}
+\captionsetup[figure]{font=footnotesize, labelfont=bf, labelsep=quad, skip=3pt}
+\captionsetup[table]{font=footnotesize, labelfont=bf, labelsep=quad, skip=3pt}
+\renewcommand{\arraystretch}{1.06}
+\setlength{\parskip}{1pt}
 
 % 图/表统一按章编号（A 题不分章，用连续编号）
 \renewcommand{\thefigure}{G\arabic{figure}}
@@ -66,15 +75,30 @@
 }
 
 % 页眉页脚
+% 规范第三条：论文从摘要页开始编页码，页码位于**页脚中部**，阿拉伯数字从 1 起连续编号。
+% 规范第六条：任何地方都不能有显示参赛者身份、学校及赛区的信息 —— 故页眉只写题号与题名。
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small 2026 全国大学生数学建模竞赛\quad A 题}
-\fancyhead[R]{\small 药材的烘干问题}
+\fancyhead[C]{\small 2026 高教社杯全国大学生数学建模竞赛\quad A 题}
 \fancyfoot[C]{\small\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 
 \titleformat{\section}{\bfseries\large}{\thesection}{0.6em}{}
 \titleformat{\subsection}{\bfseries\normalsize}{\thesubsection}{0.6em}{}
+
+% ---------------- 压缩版式（正文 ≤30 页的硬约束）----------------
+\linespread{1.08}
+\setlength{\abovedisplayskip}{4pt}
+\setlength{\belowdisplayskip}{4pt}
+\setlength{\abovedisplayshortskip}{2pt}
+\setlength{\belowdisplayshortskip}{2pt}
+\captionsetup[figure]{skip=2pt}
+\captionsetup[table]{skip=2pt}
+\setlength{\floatsep}{6pt plus 1pt minus 1pt}
+\setlength{\textfloatsep}{7pt plus 1pt minus 1pt}
+\setlength{\intextsep}{6pt plus 1pt minus 1pt}
+% 图片默认宽度（各图可覆盖）
+\newcommand{\figw}{0.76\textwidth}
 
 % 常用记号简写
 \newcommand{\Cmax}{C_{\max}}
@@ -86,19 +110,20 @@
 % ==========================================================================
 \begin{document}
 
-% ---------------- 标题 ----------------
+% ---------------- 标题（与摘要同页，符合"摘要内容含标题"）----------------
 \begin{center}
-  {\LARGE\bfseries 药材的烘干问题}\\[6pt]
+  {\LARGE\bfseries 药材的烘干问题}\\[4pt]
   {\large —— 一维轴对称热湿耦合模型、有限体积求解与判据口径分析}
 \end{center}
-\vspace{4pt}
+\vspace{2pt}
 
+% 🔴 规范第四条：论文从摘要页之后**不要目录**。
+%    首版曾用 \tableofcontents（占 3 页），违反规范，已删除。
 \input{sections/00_abstract}
 
 \newpage
-\tableofcontents
-\newpage
 
+% ==================== 正文（必须 ≤30 页）====================
 \input{sections/01_restate}
 \input{sections/02_analysis}
 \input{sections/03_assume}
@@ -112,7 +137,15 @@
 \input{sections/11_improve}
 \input{sections/12_merits}
 \input{sections/13_conclusion}
-\input{sections/14_refs}
-\input{sections/15_appendix}
+
+% ==================== AI 工具使用声明（必须在参考文献之前）====================
+% 依据《全国大学生数学建模竞赛人工智能工具使用规定》第 3 条
+\input{sections/14_ai_decl}
+
+% ==================== 参考文献 ====================
+\input{sections/15_refs}
+
+% ==================== 附录（页数不限）====================
+\input{sections/16_appendix}
 
 \end{document}
