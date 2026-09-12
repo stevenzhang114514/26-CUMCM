@@ -1,0 +1,118 @@
+% !TeX program = xelatex
+% ==========================================================================
+%  2026 全国大学生数学建模竞赛  A 题：药材的烘干问题
+%  编译：xelatex → xelatex（两遍，解交叉引用）
+% ==========================================================================
+\documentclass[UTF8, a4paper, 11pt, fontset=windows]{ctexart}
+
+% ---------------- 页面 ----------------
+\usepackage[top=2.5cm, bottom=2.5cm, left=2.6cm, right=2.6cm]{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+% ---------------- 数学 ----------------
+\usepackage{amsmath, amssymb, mathtools, bm}
+
+% ---------------- 表格 ----------------
+\usepackage{booktabs, multirow, array, tabularx, longtable, makecell}
+
+% ---------------- 图 ----------------
+\usepackage{graphicx, subcaption, float}
+\graphicspath{{figs/}}
+
+% ---------------- 代码 ----------------
+\usepackage{listings}
+
+% ---------------- 颜色与链接 ----------------
+\usepackage{xcolor}
+\definecolor{ppMagenta}{HTML}{BD4DA3}
+\definecolor{ppViolet}{HTML}{8182BA}
+\definecolor{ppMauve}{HTML}{B58581}
+\definecolor{ppSky}{HTML}{88C6E2}
+\definecolor{ppYellow}{HTML}{FBF065}
+\definecolor{ppMint}{HTML}{C5E4E7}
+\usepackage[colorlinks, linkcolor=ppMagenta, citecolor=ppViolet,
+            urlcolor=ppSky, bookmarksnumbered]{hyperref}
+
+% ---------------- 其他 ----------------
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{siunitx}
+\usepackage{algorithm2e}
+
+% ==========================================================================
+%  样式
+% ==========================================================================
+\captionsetup[figure]{font=small, labelfont=bf, labelsep=quad, skip=4pt}
+\captionsetup[table]{font=small, labelfont=bf, labelsep=quad, skip=4pt}
+\renewcommand{\arraystretch}{1.18}
+\setlength{\parskip}{2pt}
+
+% 图/表统一按章编号（A 题不分章，用连续编号）
+\renewcommand{\thefigure}{G\arabic{figure}}
+\renewcommand{\thetable}{\arabic{table}}
+
+% 代码样式
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{ppMint},
+  keywordstyle=\color{ppMagenta}\bfseries,
+  commentstyle=\color{ppMauve}\itshape,
+  stringstyle=\color{ppViolet},
+  numbers=left, numberstyle=\tiny\color{ppMauve},
+  showstringspaces=false, tabsize=2, columns=flexible,
+}
+
+% 页眉页脚
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small 2026 全国大学生数学建模竞赛\quad A 题}
+\fancyhead[R]{\small 药材的烘干问题}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\section}{\bfseries\large}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\bfseries\normalsize}{\thesubsection}{0.6em}{}
+
+% 常用记号简写
+\newcommand{\Cmax}{C_{\max}}
+\newcommand{\tstar}{t_{*}}
+\newcommand{\tdry}{t_{\mathrm{dry}}}
+\newcommand{\Cinf}{C_\infty^{\mathrm{eq}}}
+\newcommand{\R}{\mathbb{R}}
+
+% ==========================================================================
+\begin{document}
+
+% ---------------- 标题 ----------------
+\begin{center}
+  {\LARGE\bfseries 药材的烘干问题}\\[6pt]
+  {\large —— 一维轴对称热湿耦合模型、有限体积求解与判据口径分析}
+\end{center}
+\vspace{4pt}
+
+\input{sections/00_abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+\input{sections/01_restate}
+\input{sections/02_analysis}
+\input{sections/03_assume}
+\input{sections/04_symbols}
+\input{sections/05_data}
+\input{sections/06_problem1}
+\input{sections/07_problem2}
+\input{sections/08_problem3}
+\input{sections/09_problem4}
+\input{sections/10_checks}
+\input{sections/11_improve}
+\input{sections/12_merits}
+\input{sections/13_conclusion}
+\input{sections/14_refs}
+\input{sections/15_appendix}
+
+\end{document}

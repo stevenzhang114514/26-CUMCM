@@ -1,0 +1,79 @@
+\section{数据处理}
+
+\subsection{环境数据及插值}
+
+附件1 给出烘房温度与水分浓度的实测序列，共 241 点，覆盖 0--14400 s，步长恒为 60 s。
+
+实测发现：温度差分\textbf{变号 116 次}、水分浓度变号 119 次，
+\textbf{波动遍布全程}，不只是尾部。故本文采用\textbf{忠实插值}
+（PCHIP 过全部实测点）作为默认版本，\textbf{受控平滑}（Savitzky--Golay）
+仅作对照。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.92\textwidth]{G2_env.png}
+  \caption{附件1 环境数据。阴影为平台段（$t\ge9600$ s，$n=81$），
+           虚线为其均值}
+  \label{fig:G2}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{FIG-13_smoothing.png}
+  \caption{环境插值与受控平滑对照。(b) 为两者之差，即被平滑掉的部分；
+           其量级即实测波动水平}
+  \label{fig:FIG13}
+\end{figure}
+
+\subsection{阶段识别}
+
+以温度达到最终升温 $95\%$ 为判据，预热平衡阶段约为 0--4898 s；
+以升温速率小于 $0.001\ ^\circ\mathrm{C}$/s 为判据，趋于稳定点为 1866 s。
+本文以 \textbf{4898 s} 作为预热/恒温分界。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.86\textwidth]{G2b_stage.png}
+  \caption{预热/恒温阶段识别。两个判据给出的切点相差约 3000 s，
+           本文取较保守的 4898 s}
+  \label{fig:G2b}
+\end{figure}
+
+\subsection{长时环境边界（必须显式假设）}
+
+附件1 只覆盖 0--14400 s（4 h），而问题2/3 需 2--3 天，
+恒温段边界\textbf{必须显式假设，不能靠插值函数外推}。本文采用：
+
+\begin{table}[H]
+  \centering
+  \caption{长时环境边界处理方案}
+  \label{tab:env}
+  \small
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    时段 & 处理 \\
+    \midrule
+    $t\le14400$ s & PCHIP 过全部 241 个实测点（忠实插值） \\
+    $t>14400$ s & $T_\infty\equiv50.0017\ ^\circ\mathrm{C}$、
+                   $\Cinf\equiv0.049998$ kg/kg（$t\ge9600$ s 段 $n=81$ 的均值） \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\textbf{切换点处的阶跃}：温度 $-0.1633\ ^\circ\mathrm{C}$、
+含水率 $+1.38\times10^{-4}$ kg/kg——落在实测波动带内
+（该段标准差：$T$ 为 $0.1558\ ^\circ\mathrm{C}$、$C$ 为 $1.57\times10^{-4}$），
+\textbf{小于一个标准差}。这是``把噪声末点拉回其自身均值''，\textbf{不是引入新信息}。
+
+\subsection{半径数据}
+
+附件2 给出药材半径随时间变化，共 145 点，覆盖 0--259200 s（72 h）。
+半径从 $2.000$ cm 严格单调递减到 $1.198$ cm，\textbf{收缩 40.1\%}。
+本文采用 PCHIP 保单调插值拟合 $R(t)$，拟合残差 $<10^{-4}$ cm 量级。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{G3_radius.png}
+  \caption{附件2 半径数据、PCHIP 保单调拟合与残差}
+  \label{fig:G3}
+\end{figure}

@@ -1,0 +1,23 @@
+{
+  "version": "A-2026-M0-r3 | python 3.14.2 | numpy 2.4.4 | grid N=200/γ=1.5 | θ=1.0",
+  "grid": "Grid N=200, γ=1.5, R0=20.0mm | Δr: 0.00707 ~ 0.14981 mm (比 21:1)",
+  "theta": 1.0,
+  "tolerances": {
+    "atol_T": 1e-05,
+    "rtol_T": 1e-07,
+    "atol_C": 1e-08,
+    "rtol_C": 1e-07
+  },
+  "result2_3h": {
+    "ok": true,
+    "n_accepted": 12652,
+    "C_center_3h": 1.7661930138801147,
+    "T_center_3h": 49.8493500939788,
+    "wall_s": 82.09713244438171
+  },
+  "t_star_s": 206959.95208740234,
+  "t_star_h": 57.48887557983399,
+  "t_star_day2_s": 206959.95208740234,
+  "reproduce_delta_s": 0.0,
+  "C_max_at_tstar": 0.14999999979190626
+}

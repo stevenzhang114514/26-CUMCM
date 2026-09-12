@@ -1,0 +1,115 @@
+{
+  "env": {
+    "python_version": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "numpy": "2.5.3",
+    "pandas": "3.0.5",
+    "scipy": "1.18.1",
+    "matplotlib": "3.11.1",
+    "generated_at": "2026-09-11T14:05:58"
+  },
+  "configs": [
+    {
+      "config_id": "p1_v1",
+      "problem": null,
+      "time_unit": "s",
+      "space_unit": "cm",
+      "temperature_unit": "C",
+      "moisture_unit": "kg/kg",
+      "time_range": null,
+      "space_range": null,
+      "grid": {
+        "time_step": null,
+        "space_step": null
+      },
+      "solver": {
+        "method": null,
+        "time_scheme": null,
+        "max_residual": null
+      },
+      "validation": {
+        "status": null,
+        "notes": null
+      }
+    },
+    {
+      "config_id": "p2_v1",
+      "problem": null,
+      "time_unit": "s",
+      "space_unit": "cm",
+      "temperature_unit": "C",
+      "moisture_unit": "kg/kg",
+      "time_range": null,
+      "space_range": null,
+      "grid": {
+        "time_step": null,
+        "space_step": null
+      },
+      "solver": {
+        "method": null,
+        "time_scheme": null,
+        "max_residual": null
+      },
+      "validation": {
+        "status": null,
+        "notes": null
+      }
+    },
+    {
+      "config_id": "p3_v1",
+      "problem": null,
+      "time_unit": "s",
+      "space_unit": "cm",
+      "temperature_unit": "C",
+      "moisture_unit": "kg/kg",
+      "time_range": null,
+      "space_range": null,
+      "grid": {
+        "time_step": null,
+        "space_step": null
+      },
+      "solver": {
+        "method": null,
+        "time_scheme": null,
+        "max_residual": null
+      },
+      "validation": {
+        "status": null,
+        "notes": null
+      }
+    },
+    {
+      "config_id": "p4_v1",
+      "problem": null,
+      "time_unit": "s",
+      "space_unit": "cm",
+      "temperature_unit": "C",
+      "moisture_unit": "kg/kg",
+      "time_range": null,
+      "space_range": null,
+      "grid": {
+        "time_step": null,
+        "space_step": null
+      },
+      "solver": {
+        "method": null,
+        "time_scheme": null,
+        "max_residual": null
+      },
+      "validation": {
+        "status": null,
+        "notes": null
+      }
+    }
+  ],
+  "files": [
+    "data\\result1.xlsx",
+    "data\\result1_template.xlsx",
+    "data\\result2.xlsx",
+    "data\\result2_template.xlsx",
+    "data\\result3.xlsx",
+    "data\\result3_template.xlsx",
+    "data\\result4.xlsx",
+    "data\\result4_template.xlsx"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "version": "A-2026-M0-r3 | python 3.14.2 | numpy 2.4.4 | grid N=200/γ=1.5 | θ=1.0",
+  "python": "3.14.2",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "numpy": "2.4.4",
+  "wall_start": "2026-09-12T11:34:33.078416",
+  "packages": {
+    "scipy": "1.18.0",
+    "pandas": "3.0.3",
+    "matplotlib": "3.11.0",
+    "openpyxl": "3.1.5"
+  },
+  "result_files": {
+    "result2.xlsx": {
+      "sha256_16": "81cd794eb2e50f5e",
+      "bytes": 2555794
+    },
+    "result2_全程版.xlsx": {
+      "sha256_16": "8836c5fd0f165fa1",
+      "bytes": 557929
+    },
+    "result3.xlsx": {
+      "sha256_16": "21cb0a58d5f028a5",
+      "bytes": 326638
+    }
+  },
+  "wall_end": "2026-09-12T11:34:33.450359"
+}

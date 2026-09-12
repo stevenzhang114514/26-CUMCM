@@ -1,0 +1,49 @@
+\section{符号说明}
+
+\begin{table}[H]
+  \centering
+  \caption{主要符号说明}
+  \label{tab:symbols}
+  \small
+  \begin{tabularx}{\textwidth}{@{}cXc@{}}
+    \toprule
+    符号 & 含义 & 单位 \\
+    \midrule
+    $t$ & 时间 & s \\
+    $r$ & 到药材中心的距离 & m \\
+    $R(t)$ & 当前半径（问题4 随时间变化） & m \\
+    $R_0$ & 初始半径，$R_0=0.02$ & m \\
+    $L_0$ & 药材长度，$L_0=0.25$ & m \\
+    $\xi=r/R(t)$ & 归一化径向坐标（材料坐标） & --- \\
+    $T$ & 药材温度 & $^\circ$C（$D$ 公式内为 K） \\
+    $T_\infty$ & 烘房温度 & $^\circ$C \\
+    $C$ & 药材干基含水率 $m_w/m_d$ & kg/kg \\
+    $Y$ & 空气含湿量 $m_v/m_{da}$ & kg/kg \\
+    $\Cinf$ & 等效环境平衡含水率 & kg/kg \\
+    $\Cmax(t)$ & 全域最大含水率 $\max_r C(r,t)$ & kg/kg \\
+    $\bar C(t)$ & 面积平均含水率 & kg/kg \\
+    $\tstar$ & 问题3 的阈值通过时刻 & s \\
+    $\tdry$ & 问题4 的烘干时长 & s \\
+    $\rho$ & 湿物料体积密度 & kg/m$^3$ \\
+    $\rho_d$ & 干固体密度 $\rho/(1+C)$ & kg/m$^3$ \\
+    $c_p$ & 比热容 & J/(kg$\cdot$K) \\
+    $k$ & 热传导系数 & W/(m$\cdot$K) \\
+    $\alpha=k/(\rho c_p)$ & 热扩散率 & m$^2$/s \\
+    $D$ & 水分有效扩散系数 & m$^2$/s \\
+    $h$ & 对流换热系数，$h=25$ & W/(m$^2\cdot$K) \\
+    $h_m$ & 对流传质系数，$h_m=8\times10^{-7}$ & m/s \\
+    $\lambda$ & 汽化潜热 & J/kg \\
+    $J_w$ & 向外的水质量通量 & kg/(m$^2\cdot$s) \\
+    $e_d(t)$ & 几何—密度一致性诊断量 & --- \\
+    $Bi_T=hR_0/k$ & 传热毕渥数 & --- \\
+    $Bi_m=h_mR_0/D$ & 传质毕渥数 & --- \\
+    $S$ & 灵敏度系数 $(\Delta Y/Y)/(\Delta P/P)$ & --- \\
+    $\Delta r,\ \Delta t$ & 空间步长、时间步长 & m, s \\
+    $\gamma$ & 渐变网格加密指数（$\gamma>1$ 向表面加密） & --- \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\noindent\textbf{上标与下标约定}：上标 ``eq'' 表示``等效''（题设约定），
+下标 ``$\infty$'' 表示环境值，下标 ``$s$'' 表示表面值，
+下标 ``$0$'' 表示初值。$\widetilde{C},\widetilde{T}$ 表示材料坐标下的场量。

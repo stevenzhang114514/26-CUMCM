@@ -1,0 +1,436 @@
+"""
+文献引用登记表                        [甲 · Day2]
+
+为什么单独建一个模块
+--------------------
+Day2 起模型中开始出现**来自文献**的成分（潜热边界、无量纲数取值、灵敏度先验、
+收缩各向异性参数）。这些内容一旦写进代码或图里，就**必须能追溯到具体出处**。
+
+本模块把"引用"变成**代码里的一等公民**：
+  * 每条文献在此登记一次，分配唯一 key（如 ``R3-F1``）
+  * 代码与图注通过 key 引用，不手抄文献名
+  * ``render_markdown()`` 自动生成参考文献表，避免正文与代码对不上
+
+⚠️ 可信度分级（必须随引用一起报告）
+------------------------------------
+    PRIMARY : 题面/附件直接给定 —— **最高优先级**，不得用文献值替换
+    REPORT  : 文献研报中给出**显式公式或数值**，但研报本身是二手汇编
+    REVIEW  : 仅定性描述或综述性结论，**不可当作定量依据**
+    FLAGGED : 研报内部/研报之间**存在冲突**，或研报自身标注"待核实"
+              —— 引用时必须同时写出冲突，**不得单取一侧**
+
+⚠️ 研报来源声明
+----------------
+R1—R4 是**检索型研报**（由检索工具生成、非同行评议原始论文），
+P1 是**第一轮论文池**（其自述"不等同于最终参考文献表，DOI/结论须逐条核验"）。
+因此：
+  * 凡 R1—R4 中给出的**原始文献条目**（作者/年份/DOI），本模块原样登录为
+    ``kind="paper"``，**并标注其 DOI 需人工核验**；
+  * 凡研报自身的**综合判断或推算**，登录为 ``kind="report"``，
+    在论文中只能写成"检索报告归纳"而非"某文献报道"。
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+
+# ==========================================================================
+# 数据结构
+# ==========================================================================
+@dataclass(frozen=True)
+class Ref:
+    key: str                     # 唯一引用键，正文写 [R3-F1] 这样
+    kind: str                    # "paper" | "report" | "problem" | "own"
+    confidence: str              # PRIMARY | REPORT | REVIEW | FLAGGED
+    short: str                   # 一句话：这条给了什么
+    detail: str = ""             # 定量内容（公式/数值）
+    source: str = ""             # 研报文件名或原始出处
+    citation: str = ""           # 原始文献条目（paper 类）
+    caveat: str = ""             # 使用限制 / 冲突提示
+    used_by: tuple = field(default_factory=tuple)   # 本项目中哪些模块用了它
+
+
+# ==========================================================================
+# 题面与附件 —— PRIMARY
+# ==========================================================================
+PROBLEM = [
+    Ref("Q-PDF", "problem", "PRIMARY",
+        "2026 CUMCM A 题题面原文（含附录1—4）",
+        source="A题题目和附件/A题.pdf",
+        detail="附录2：ρ=820, cp=2600, k=0.36, h=25, h_m=8e-7, "
+               "D=7e-9·exp(−0.89/C)；"
+               "附录3：ρ=650+128C, cp=1450+2736C/(1+C), k=0.21+0.38C/(1+C), "
+               "D=2.4e-3·exp(−0.45/C)·exp(−3850/T_K)；"
+               "附录4：ρ=760+90C, cp=1850+2150C/(1+C), k=0.12+0.20C/(1+C), "
+               "D=4.2e-4·exp(−0.30/C)·exp(−3850/T_K)",
+        caveat="题面记载 附录2/3/4 中 T 的单位均为 K；题面全文**没有**出现「265 倍」字样，"
+               "该比值是事后计算，引用时不得写成「题目指出」。"),
+    Ref("Q-A1", "problem", "PRIMARY",
+        "附件1：烘房温度与水分浓度（0—14400 s，241 点）",
+        source="A题题目和附件/附件/附件1.xlsx",
+        detail="温度 28.0000→50.1650 °C；水分浓度 0.019630→0.049860 kg/kg；"
+               "t≥9600 s 段 T∞ 均值 50.0017 °C、C∞ 均值 0.049998 kg/kg",
+        caveat="只覆盖 4 h，而问题2 需 2—3 天 → **恒温段边界必须显式假设**。"),
+    Ref("Q-A2", "problem", "PRIMARY",
+        "附件2：药材半径随时间变化（0—259200 s，145 点）",
+        source="A题题目和附件/附件/附件2.xlsx",
+        detail="半径 2.0000 → 1.1980 cm，严格单调递减（144 个差分全 ≤ 0）"),
+]
+
+# ==========================================================================
+# R3 —— 关键物理因素机理分析报告（Day2 最核心的一份）
+# ==========================================================================
+R3 = [
+    Ref("R3-F1", "report", "REPORT",
+        "蒸发潜热：表面能量平衡形式与 Kossovitch 数",
+        detail="−k ∂T/∂r|_R = h(T∞−Ts) − ΔH_vap·ṁ″；"
+               "ΔH_vap ≈ 2.26×10⁶ J/kg；"
+               "Ko = ΔH_vap·ΔX/(cp·ΔT)，本工况 2.5~4.5（通用 1.5~5.0）；"
+               "忽略潜热 → 初期物料平均温度预测偏高 12~22 °C；"
+               "恒速期对流热的 70%~85% 被蒸发潜热消耗；"
+               "28—50 °C 工况湿球温度约 21~32 °C",
+        source="相关文献/圆柱形中药材热风烘干模型评价与推广关键物理因素文献检索与机理分析报告",
+        citation="Kumar, C.; Millar, G. J.; Karim, M. A. (2015). Effective Diffusivity "
+                 "and Evaporative Cooling in Convective Drying of Food Material. "
+                 "Drying Technology 33(2): 227–237. DOI: 10.1080/07373937.2014.947512",
+        caveat="数值为研报汇总；λ 应按实际温度查证（本模块取 50 °C 附近的 2.38×10⁶ 亦可），"
+               "本报告统一用 2.26×10⁶ 并标注。",
+        used_by=("models/boundary.py", "models/problem2.py")),
+    Ref("R3-F2", "report", "REPORT",
+        "内部蒸发与水蒸气渗流：达西流可忽略判据",
+        detail="T<60 °C 时 ΔP_g < 0.1 kPa，渗流占比 < 1.5%（扩散占 98.5%）；"
+               "Pe_p = |v_g|L_char/D_eff,v ≪ 1；"
+               "植物组织渗透率 K = 10⁻¹⁶~10⁻¹³ m²；"
+               "忽略气相压力 → 水分场偏差 < 2%",
+        source="同上（R3 因素2）",
+        citation="Halder, A.; Dhall, A.; Datta, A. K. (2020). Estimating permeability and "
+                 "porosity of plant tissues. J. Food Eng. DOI: 10.1016/j.jfoodeng.2020.109912",
+        caveat="支持**只解扩散、不引入气相渗流**的建模选择 —— 这是 M0 的有效性依据。",
+        used_by=("models/boundary.py", "figures/fig16_dimensionless.py")),
+    Ref("R3-F3", "report", "REPORT",
+        "Luikov 层次结构与交叉扩散量级",
+        detail="Lu = a_m/a_q = D/α ∈ 10⁻⁴~10⁻³；"
+               "Pn = δ·ΔT/ΔX ∈ 10⁻³~10⁻²（δ = 0.001~0.01 K⁻¹），Pn<0.05 可忽略；"
+               "Soret 通量占比 0.3%~1.1%，忽略后干燥时间误差 < 0.8 h（<1.5%）；"
+               "Luikov 源项形式含相变系数 ε_evap ∈ [0,1]",
+        source="同上（Luikov 节 + 因素3）",
+        citation="Luikov, A. V. (1975). Systems of differential equations of heat and mass "
+                 "transfer in capillary-porous bodies. IJHMT. DOI: 10.1016/0017-9310(75)90002-2",
+        caveat="Ko/Lu/Pn 的取值来源为 Younsi et al. (2007) 的**木材**高温热处理算例，"
+               "非中药材实测 → 只能作量级参照。",
+        used_by=("figures/fig16_dimensionless.py",)),
+    Ref("R3-F4", "report", "FLAGGED",
+        "辐射换热的量级估算",
+        detail="q″_rad = ε_s σ(T_w⁴−T_s⁴)，h_rad = ε_s σ(T_w+T_s)(T_w²+T_s²) ≈ 6.5 W/(m²·K)；"
+               "ε_s 干态 0.85 / 湿态 0.95；N_rc = h_rad/h_conv ≈ 0.26",
+        source="同上（R3 因素4）",
+        caveat="🔴 **冲突**：研报随后自述 h=25 W/(m²·K) 已在标定中隐含吸收辐射；"
+               "论文池第七节明确警告该比例「属待验证估算，不应作为文献事实」。"
+               "→ 本项目**不把辐射并入 M0/M1 基线**，仅在论文中作量级讨论。",
+        used_by=("docs/Day2_结论.md（仅讨论，不入模型）",)),
+    Ref("R3-F5", "report", "REPORT",
+        "表面结壳与 Bi_m 量级",
+        detail="D_crust = 10⁻²~10⁻⁴ D_core；忽略结壳 → 中心含水率残留低估 25%~40%、"
+               "后期速率降 35%~50%；Bi_m ≫ 1 时表层迅速跌落结壳",
+        source="同上（R3 因素5）",
+        citation="Gulati, T.; Datta, A. K. (2015). J. Food Eng. 166: 119–138. "
+                 "DOI: 10.1016/j.jfoodeng.2015.05.031",
+        caveat="🔴 **Bi_m 存在冲突**：R3 因素5 给本工况 Bi_m ≈ 16~160，"
+               "R4 因素20 给 5.0~15.0（隐含 D_eff 假设不同）。"
+               "本项目一律以附录3 的 D(C,T) **自算**，文献区间仅并列标注。",
+        used_by=("figures/fig16_dimensionless.py",)),
+    Ref("R3-F6", "report", "REPORT",
+        "结合水与吸附等温线（GAB / 等量吸附热）",
+        detail="GAB: X = X_m·C_K·K·a_w / [(1−K a_w)(1−K a_w + C_K K a_w)]；"
+               "等量吸附热由 Clausius–Clapeyron 给出 q_st = −R_g[∂ln a_w/∂(1/T)]_X；"
+               "C < 0.25 kg/kg 时 q_st 达 600~1500 kJ/kg（占纯水相变热 25%~60%）；"
+               "含水率 0.25→0.15 kg/kg 时脱附等效焓 2260→3100 kJ/kg；"
+               "忽略结合能 → 末期能耗/时间低估约 22%",
+        source="同上（R3 因素6）",
+        citation="Soysal, Y.; Öztekin, S. (2001). J. Agricultural Engineering Research. "
+                 "DOI: 10.1006/jaer.2000.0637",
+        caveat="❌ **中药材的 GAB 参数值（X_m、C_K、K）研报没有给出**，"
+               "故本项目**不建吸附等温关系**，边界仍按题设等效约定 C∞ᵉᑫ。",
+        used_by=("docs/Day2_结论.md（作为局限）",)),
+    Ref("R3-F7", "report", "REPORT",
+        "玻璃化转变：低含水率下 D 的断崖",
+        detail="Gordon–Taylor: T_g(X) = (w_s T_gs + k_GT X T_gw)/(w_s + k_GT X)，"
+               "T_gs = 60~100 °C，T_gw = 138 K，k_GT = 3.5~5.5；"
+               "WLF 跨越 T_g 时 D 跌落 10²~10³ 倍；"
+               "本工况 C=0.15 时 T_g ≈ 55~65 °C > 50 °C → 表层必跨玻璃化线",
+        source="同上（R3 因素7）",
+        citation="Champion, D.; Loupiac, C. et al. (2000). J. Food Eng. "
+                 "DOI: 10.1016/S0260-8774(00)00028-5",
+        caveat="研报称此机理可解释「题设 D 在低含水率段的骤降」——"
+               "🔴 但**题面并未声明 265 倍**，该比值属事后计算；"
+               "本项目只把玻璃化作为**机理讨论**，不修改附录3 的 D 公式。",
+        used_by=("figures/fig18_D_contour.py（讨论图层）",)),
+]
+
+# ==========================================================================
+# R4 —— 热-湿-力耦合、多维效应、不确定性
+# ==========================================================================
+R4 = [
+    Ref("R4-F18", "report", "REPORT",
+        "干裂判据与力学参数",
+        detail="Rankine 最大主拉应力准则 max(σ_r,σ_θ,σ_z) ≥ σ_t(C,T)；"
+               "根茎类软组织 E 湿态 0.5–15 MPa / 干态 50–350 MPa；"
+               "σ_t 湿态 0.2–1.8 MPa / 玻璃态 2.5–8.0 MPa；G_c ≈ 80–450 J/m²；"
+               "玉米籽粒内外水分差 0.08 g/g 时周向拉应力达 4.2 MPa",
+        source="相关文献/圆柱形生物多孔介质热风干燥中的热-湿-力耦合破坏多维效应与不确定性量化研究报告",
+        citation="Takhar, P. S. (2011). J. Food Eng. DOI: 10.1016/j.jfoodeng.2011.01.026",
+        caveat="⚠️ 唯一的「水分梯度阈值」案例是**玉米**，物料不匹配，"
+               "**不得**直接搬成中药材的开裂判据。本项目只作扩展章路线，不进 Day2 模型。",
+        used_by=("docs/Day2_结论.md（推广章路线）",)),
+    Ref("R4-F19", "report", "REPORT",
+        "收缩的各向异性",
+        detail="ε^m = β_r ΔC(e_r⊗e_r + e_θ⊗e_θ) + β_z ΔC(e_z⊗e_z)，β_r = β_θ ≫ β_z；"
+               "植物根茎类径向收缩 30%~50%、轴向仅 5%~15%、各向异性比 k_sh = 2.5~6.0；"
+               "刚度比 E_z/E_r = 3~8；孔隙率 φ(C) = 1 − (1−φ₀)(V₀/V)((1+ρ_s C/ρ_w)/(1+ρ_s C₀/ρ_w))",
+        source="同上（R4 因素19）",
+        citation="Mayor, L.; Sereno, A. M. (2004). J. Food Eng. "
+                 "DOI: 10.1016/S0260-8774(03)00144-4；"
+                 "Souraki, B. A.; Mowla, D. (2008). J. Food Eng. 88: 9–19. "
+                 "DOI: 10.1016/j.jfoodeng.2007.05.013",
+        caveat="🔴 **与问题4 的均匀仿射假设存在张力**：k_sh = 2.5~6.0 说明径向≫轴向，"
+               "而问题4 的 λ_z = 1（长度不变）+ 径向仿射**恰是**这一各向异性的极限情形，"
+               "故文献反而**支持**「固定长度 + 径向仿射」的建模选择（论文可这样写），"
+               "但必须声明该选择是**假设**，单个表面半径无法识别内部位移是否仿射。",
+        used_by=("docs/Day2_结论.md（问题4 论证）",)),
+    Ref("R4-F20", "report", "REPORT",
+        "端面效应与一维降维误差",
+        detail="AR = L/(2R₀) = 6.25（≥5 判据来源：Meesters et al. 2002）；"
+               "端面面积比 8.0%；端面扰动深度 2.0–4.0 cm（每端）；"
+               "端部 1.5R₀ 区间失水快 25%~45%；"
+               "一维简化误差：中截面含水率 <1.5%，全域平均偏差 3.5%~6.0%（各向同性）"
+               "或 8.0%~14.0%（各向异性）",
+        source="同上（R4 因素20）",
+        citation="Meesters, A. G. C. A.; Dunai, T. J.; Farley, K. A. (2002). EPSL. "
+                 "DOI: 10.1016/S0012-821X(02)00843-0",
+        caveat="🔴 研报内**自相张力**：一处给「AR≥5 时全域平均偏差 <5%」，"
+               "另一处给本工况 3.5%~6.0%（各向同性）甚至 8.0%~14.0%（各向异性）。"
+               "前者是「中截面取样」口径，后者是「全域平均」口径 → 引用必须注明口径。",
+        used_by=("figures/fig16_dimensionless.py", "docs/Day2_结论.md")),
+    Ref("R4-F21", "report", "REPORT",
+        "全局灵敏度（Sobol）与参数不确定度先验",
+        detail="S_D ≈ 0.65~0.78、S_R ≈ 0.15~0.22（二者合计解释干燥终点时间变异的 85%+）；"
+               "S_hm < 0.03（因 Bi_m ≫ 1，内部扩散主导）；"
+               "CV 先验：D_eff 对数正态 15%~35%、E_a 正态 5%~12%、h_m 正态 10%~25%、"
+               "C₀ 正态 6%~18%、R₀ 正态 8%~20%；"
+               "D 参数 CV=20% → 干燥时间 95% CI ±15.6%",
+        source="同上（R4 因素21）",
+        citation="Mercier, S.; Moresoli, C.; Villeneuve, S. et al. (2013). J. Food Eng. "
+                 "DOI: 10.1016/j.jfoodeng.2013.03.030；"
+                 "Defraeye, T.; Radu, A.; Derome, D. (2016). Food and Bioproducts Processing. "
+                 "DOI: 10.1016/j.fbp.2016.08.006",
+        caveat="🔴 **DOI 冲突**：P1 把同一 DOI 10.1016/j.jfoodeng.2013.03.030 同时给了"
+               "一篇「香蕉圆柱干燥」论文，二者必有一错 → 正式引用前必须核验。"
+               "⚠️ S_hm<0.03 的前提是 Bi_m ≫ 1；**本项目自算 Bi_m 初期仅约 1.2**，"
+               "故该结论在本工况**未必成立** → 作为**待检验猜想**，由 CODE-25 检验。",
+        used_by=("validation/scenarios.py", "docs/Day2_结论.md")),
+]
+
+# ==========================================================================
+# R2 —— 系统级与工程因素（Day2 只用到耦合判据）
+# ==========================================================================
+R2 = [
+    Ref("R2-F8", "report", "REPORT",
+        "烘房—物料双向耦合与解耦判据",
+        detail="Π_buildup = ṁ_evap^max/(ṁ_vent[Y_sat−Y_in])：弱耦合 <0.05、强耦合 >0.2；"
+               "忽略耦合 → 干燥周期偏快 22%~35%；进气初期烘房温降 6~14 °C",
+        source="相关文献/中药材热风烘干系统级建模与工程因素文献深度研报",
+        citation="Ratti, C.; Crapiste, G. H. (2009). Food and Bioprocess Technology. "
+                 "DOI: 10.1007/s11947-008-0129-z",
+        caveat="用于说明**为什么把烘房当作给定边界（单向驱动）是 M0 的合理简化**，"
+               "以及 M2 何时必须改成双向耦合。",
+        used_by=("docs/Day2_结论.md（M2 路线）",)),
+    Ref("R2-F13", "report", "REPORT",
+        "控温波动对物料的影响",
+        detail="±0.2~0.5 °C 高频抖动对平均含水率轨迹扰动 <0.05%，芯部温度衰减 >99%；"
+               "PID 死区 ±0.5~±2.0 °C",
+        source="同上（R2 因素13）",
+        caveat="为「附件1 的实测波动不必强制平滑」提供**定量旁证**（扰动传递衰减 99%）。"
+               "⚠️ 但该数值来自研报，非本工况实测。",
+        used_by=("docs/Day2_结论.md（§5.4 忠实插值的依据）",)),
+
+    # ----------------------------------------------------------------------
+    # Day3 追加：端面效应与结壳（用户指定「找论文并加入建模」）
+    # 全部经 Crossref / OpenAlex 逐条核实，见 参考文献原文/引用核实与影响分析.md
+    # ----------------------------------------------------------------------
+    Ref("E1-ENDFACE", "paper", "PRIMARY",
+        "有限圆柱轴向/径向扩散系数分别测定（含与不含收缩）",
+        detail="青豆流化床；沿轴向与径向分别拟合 D。是 R4-F20 的**原文献**，"
+               "DOI 经核实有效且标题相符。",
+        source="参考文献原文/引用核实与影响分析.md（原 DOI 复核）",
+        citation="Abbasi Souraki, B., & Mowla, D. (2008). Axial and radial moisture "
+                 "diffusivity in cylindrical fresh green beans in a fluidized bed "
+                 "dryer with energy carrier: Modeling with and without shrinkage. "
+                 "J. Food Eng., 88(1), 9-19. DOI: 10.1016/j.jfoodeng.2007.05.013",
+        caveat="该文献是**各向异性**（D_z≠D_r）。题面只给一组 D/h/h_m，故本项目取 "
+               "D_z=D_r、端面与侧面同系数 —— 比文献**更保守**（各向异性只会让端面效应更大）。",
+        used_by=("src/models/problem3_2d.py", "docs/端面与结壳_文献与实现.md")),
+
+    Ref("E2-ENDFACE", "paper", "REPORT",
+        "各向异性有限圆柱的二维传热传质建模，多组长径比",
+        detail="证明端面效应随 L/D 减小而增大。",
+        source="参考文献原文/引用核实与影响分析.md",
+        citation="Abbasi Souraki, B., et al. (2013). Mathematical Modeling of Heat "
+                 "and Mass Transfer during Convective Dehydration of an Anisotropic "
+                 "Cylindrical Foodstuff. Heat Transfer-Asian Research. "
+                 "DOI: 10.1002/htj.21119",
+        caveat="仅作机理与量级依据；未采用其各向异性参数。⚠️ 卷期页码未核实。",
+        used_by=("docs/端面与结壳_文献与实现.md",)),
+
+    Ref("E3-ENDFACE", "paper", "REPORT",
+        "用改变圆柱高度分离轴向/径向扩散系数（胡萝卜）",
+        detail="D = 0.53~2.93e-9 m2/s；SEM 显示纵切与横切结构不同。",
+        source="参考文献原文/引用核实与影响分析.md",
+        citation="Pacheco-Aguirre, F. M., Ladron-Gonzalez, A., Ruiz-Espinosa, H., "
+                 "et al. (2014). A method to estimate anisotropic diffusion "
+                 "coefficients for cylindrical solids: Application to the drying of "
+                 "carrot. J. Food Eng., 125, 24-33. "
+                 "DOI: 10.1016/j.jfoodeng.2013.10.015",
+        caveat="物料为胡萝卜，非中药材；只作方法学参照。",
+        used_by=("docs/端面与结壳_文献与实现.md",)),
+
+    Ref("H1-CRUST", "paper", "REPORT",
+        "结壳（case hardening）的机理与孔弹性建模框架",
+        detail="多相输运 + 大变形 + 橡胶态/玻璃态相变；预测结壳程度、气体孔隙率、"
+               "体密度；对流干燥 40/70/150 °C。",
+        source="参考文献原文/引用核实与影响分析.md",
+        citation="Gulati, T., & Datta, A. K. (2015). Mechanistic understanding of "
+                 "case-hardening and texture development during drying of food "
+                 "materials. J. Food Eng., 166, 119-138. "
+                 "DOI: 10.1016/j.jfoodeng.2015.05.031",
+        caveat="🔴 **未给出中药材的壳层扩散系数比**。研报 R3-F5 引的"
+               "「D_crust=1e-2~1e-4 D_core」脚注指向 ResearchGate 页面，溯源失败。"
+               "故本项目把 β_c 与 C_g 当自由参数扫描，不声称标定值。⚠️ 付费墙，无全文。",
+        used_by=("scripts/run_day3_crust.py", "docs/端面与结壳_文献与实现.md")),
+
+    Ref("H2-CRUST", "paper", "REPORT",
+        "上述工作的 COMSOL 会议版（含建模框架细节）",
+        detail="会议报告 22 页；定义「Degree of Crust Formation (ΔT_g)」；"
+               "壳层为「薄且显著干燥的层，力学与输运性质不同于芯部」。",
+        source="参考文献原文/PDF/结壳_2015_Gulati-Datta_COMSOL会议报告.pdf",
+        citation="Gulati, T., & Datta, A. K. (2012). Multiphase Transport with Large "
+                 "Deformations Undergoing Rubbery-Glassy Phase Transition: "
+                 "Applications to Drying. Proc. 2012 COMSOL Conference, Boston.",
+        caveat="✅ **已取得全文**（唯一拿到全文的结壳文献）。"
+               "但参数表为图片，文本层无 D_crust/D_core 数值。",
+        used_by=("docs/端面与结壳_文献与实现.md",)),
+
+    Ref("H3-CRUST", "paper", "REPORT",
+        "用收缩函数与塌陷函数解释结壳（苹果 50/80/105 °C）",
+        detail="模型与实验平均偏差 <10%；高温下初始空气保留更多、体密度更低。",
+        source="参考文献原文/引用核实与影响分析.md",
+        citation="Khalloufi, S., & Bongers, P. (2012). Mathematical investigation of "
+                 "the case hardening phenomenon explained by shrinkage and collapse "
+                 "mechanisms occurring during drying processes. Computer Aided "
+                 "Chemical Engineering, 30, 1068-1072. "
+                 "DOI: 10.1016/B978-0-444-59520-1.50072-5",
+        caveat="产出的是**体密度/孔隙率**，不是扩散系数比；只引用其机理表述。",
+        used_by=("docs/端面与结壳_文献与实现.md",)),
+
+    Ref("H8-CRUST", "paper", "REPORT",
+        "NMR 实测：跨越 T_g 时扩散系数跌落 1e2~1e4 倍",
+        detail="Trends Food Sci Technol 11(2):41-55。",
+        source="参考文献原文/引用核实与影响分析.md（**DOI 为更正后**）",
+        citation="Champion, D., Le Meste, M., & Simatos, D. (2000). Towards an "
+                 "improved understanding of glass transition and relaxations in "
+                 "foods: molecular mobility in the glass transition range. Trends in "
+                 "Food Science & Technology, 11(2), 41-55. "
+                 "DOI: 10.1016/S0924-2244(00)00047-9",
+        caveat="🔴 研报原挂 DOI 10.1016/S0260-8774(00)00028-5，经 Crossref 反查"
+               "**实为 Menkov 2000「扁豆种子吸湿等温线」**，与研报声称完全不符。"
+               "本条为更正后条目。⚠️ 本项目**未**把 1e2~1e4 的降幅用于基线 —— "
+               "附录3 的 D(C,T) 已含低含水率衰减，再用会**重复计算**。",
+        used_by=("docs/端面与结壳_文献与实现.md",)),
+]
+
+# ==========================================================================
+# 本项目自行计算（不是文献，但常被误当成文献）
+# ==========================================================================
+OWN = [
+    Ref("OWN-DRATIO", "own", "PRIMARY",
+        "附录2 与附录3 的 D 在 C 方向的变化幅度（自算）",
+        detail="固定 T_K = 323.15 时："
+               "附录2  D(2.55)/D(0.15) = e^(−0.89/2.55 + 0.89/0.15) = 266.2 倍；"
+               "附录3  D(2.55)/D(0.15) = e^(−0.45/2.55 + 0.45/0.15) = 16.8 倍；"
+               "附录4  D(2.55)/D(0.15) = e^(−0.30/2.55 + 0.30/0.15) = 6.6 倍",
+        caveat="🔴 题面**没有**出现 265 倍。R3 报告写「赛题经验公式 265 倍」，"
+               "实为对**附录2** 的事后计算 → 论文中必须写成「本文计算」并注明是附录2，"
+               "**不得**写成「题目指出」。问题2/3 用附录3，该比值只有 16.8 倍。",
+        used_by=("docs/Day2_结论.md", "figures/fig18_D_contour.py")),
+    Ref("OWN-RHOD", "own", "PRIMARY",
+        "M1 潜热项所用的干基密度（自算 + 声明）",
+        detail="ρ_d = ρ(C₀)/(1+C₀) = (650+128×2.55)/3.55 = 976.4/3.55 = 275.04 kg/m³",
+        caveat="🔴 附录3 的 ρ(C) 与「干物质守恒」不兼容："
+               "ρ(C)/(1+C) 在 C=0 给 650、在 C=2.55 给 275.0，**不是常数**。"
+               "这正是 CODE-35 几何—密度诊断要处理的问题（乙）。"
+               "本项目取**初始状态基准**并显式声明，同时做 ±50% 情景扰动。",
+        used_by=("models/boundary.py", "validation/scenarios.py")),
+]
+
+
+# ==========================================================================
+ALL_REFS = PROBLEM + R3 + R4 + R2 + OWN
+_BY_KEY = {r.key: r for r in ALL_REFS}
+
+
+def get(key: str) -> Ref:
+    """按 key 取文献条目。key 不存在即报错（防止引用写错）。"""
+    if key not in _BY_KEY:
+        raise KeyError(f"未登记的引用键 {key!r}；已登记: {sorted(_BY_KEY)}")
+    return _BY_KEY[key]
+
+
+def cite(key: str) -> str:
+    """正文内的引用标记，如 '……[R3-F1]'。"""
+    return f"[{get(key).key}]"
+
+
+def marked(text: str) -> str:
+    """给一段文字自动附上引用标记。"""
+    return f"{text} {cite(text)}" if text in _BY_KEY else text
+
+
+# ==========================================================================
+def render_markdown(only_used: bool = False) -> str:
+    """生成参考文献与数据来源表（供 docs/ 直接引用）。"""
+    order = ["problem", "own", "report", "paper"]
+    label = {"problem": "题面与附件（PRIMARY，最高优先级）",
+             "own": "本项目自行计算（非文献，须与文献区分）",
+             "report": "检索型研报给出的定量内容",
+             "paper": "研报中转引的原始文献条目（DOI 须核验）"}
+    lines = ["# Day2 文献引用登记表", "",
+             "> 由 `src/refs.py` 自动生成，**不要手改**。",
+             "> 正文与图注中的 `[KEY]` 均指本表条目。", ""]
+
+    for kind in order:
+        items = [r for r in ALL_REFS if r.kind == kind]
+        if not items:
+            continue
+        lines += [f"## {label[kind]}", ""]
+        for r in items:
+            flag = {"PRIMARY": "🟢", "REPORT": "🟡", "REVIEW": "⚪", "FLAGGED": "🔴"}[r.confidence]
+            lines.append(f"### `{r.key}` {flag} {r.short}")
+            lines.append("")
+            if r.detail:
+                lines.append(f"**定量内容**：{r.detail}")
+            if r.source:
+                lines.append(f"**来源**：{r.source}")
+            if r.citation:
+                lines.append(f"**原始条目**：{r.citation}")
+            if r.caveat:
+                lines.append(f"**使用限制**：{r.caveat}")
+            if r.used_by:
+                lines.append(f"**本项目用途**：{'、'.join(r.used_by)}")
+            lines.append("")
+    return "\n".join(lines)
+
+
+if __name__ == "__main__":
+    print(f"共登记 {len(ALL_REFS)} 条")
+    for r in ALL_REFS:
+        print(f"  {r.key:12s} {r.confidence:8s} {r.short[:44]}")

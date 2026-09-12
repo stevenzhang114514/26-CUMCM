@@ -1,0 +1,208 @@
+[
+  {
+    "file": "result1.xlsx",
+    "sheets": [
+      {
+        "sheet_name": "温度",
+        "header_row": [
+          "时间\\到药材中心的距离",
+          0,
+          0.1,
+          0.2,
+          "…",
+          2
+        ],
+        "header_count": 6,
+        "time_column": [
+          "时间\\到药材中心的距离",
+          1,
+          2,
+          3,
+          "…"
+        ],
+        "time_count": 5,
+        "time_first": "时间\\到药材中心的距离",
+        "time_last": "…",
+        "max_row": 5,
+        "max_col": 6,
+        "data_shape": [
+          4,
+          5
+        ],
+        "total_cells": 20,
+        "filled_cells": 0,
+        "has_prefilled": false
+      },
+      {
+        "sheet_name": "水分浓度",
+        "header_row": [
+          "时间\\到药材中心的距离",
+          0,
+          0.1,
+          0.2,
+          "…",
+          2
+        ],
+        "header_count": 6,
+        "time_column": [
+          "时间\\到药材中心的距离",
+          1,
+          2,
+          3,
+          "…"
+        ],
+        "time_count": 5,
+        "time_first": "时间\\到药材中心的距离",
+        "time_last": "…",
+        "max_row": 5,
+        "max_col": 6,
+        "data_shape": [
+          4,
+          5
+        ],
+        "total_cells": 20,
+        "filled_cells": 0,
+        "has_prefilled": false
+      }
+    ]
+  },
+  {
+    "file": "result2.xlsx",
+    "sheets": [
+      {
+        "sheet_name": "温度",
+        "header_row": [
+          "时间\\到药材中心的距离",
+          0,
+          0.1,
+          0.2,
+          "…",
+          2
+        ],
+        "header_count": 6,
+        "time_column": [
+          "时间\\到药材中心的距离",
+          1,
+          2,
+          3,
+          "…"
+        ],
+        "time_count": 5,
+        "time_first": "时间\\到药材中心的距离",
+        "time_last": "…",
+        "max_row": 5,
+        "max_col": 6,
+        "data_shape": [
+          4,
+          5
+        ],
+        "total_cells": 20,
+        "filled_cells": 0,
+        "has_prefilled": false
+      },
+      {
+        "sheet_name": "水分浓度",
+        "header_row": [
+          "时间\\到药材中心的距离",
+          0,
+          0.1,
+          0.2,
+          "…",
+          2
+        ],
+        "header_count": 6,
+        "time_column": [
+          "时间\\到药材中心的距离",
+          1,
+          2,
+          3,
+          "…"
+        ],
+        "time_count": 5,
+        "time_first": "时间\\到药材中心的距离",
+        "time_last": "…",
+        "max_row": 5,
+        "max_col": 6,
+        "data_shape": [
+          4,
+          5
+        ],
+        "total_cells": 20,
+        "filled_cells": 0,
+        "has_prefilled": false
+      }
+    ]
+  },
+  {
+    "file": "result3.xlsx",
+    "sheets": [
+      {
+        "sheet_name": "Sheet1",
+        "header_row": [
+          "时间\\到药材中心的距离",
+          0,
+          0.1,
+          0.2,
+          "…",
+          2
+        ],
+        "header_count": 6,
+        "time_column": [
+          "时间\\到药材中心的距离",
+          60,
+          120,
+          180,
+          "…"
+        ],
+        "time_count": 5,
+        "time_first": "时间\\到药材中心的距离",
+        "time_last": "…",
+        "max_row": 5,
+        "max_col": 6,
+        "data_shape": [
+          4,
+          5
+        ],
+        "total_cells": 20,
+        "filled_cells": 0,
+        "has_prefilled": false
+      }
+    ]
+  },
+  {
+    "file": "result4.xlsx",
+    "sheets": [
+      {
+        "sheet_name": "Sheet1",
+        "header_row": [
+          "时间\\到药材中心的距离",
+          0,
+          0.1,
+          0.2,
+          "…",
+          "药材表面"
+        ],
+        "header_count": 6,
+        "time_column": [
+          "时间\\到药材中心的距离",
+          60,
+          120,
+          180,
+          "…"
+        ],
+        "time_count": 5,
+        "time_first": "时间\\到药材中心的距离",
+        "time_last": "…",
+        "max_row": 5,
+        "max_col": 6,
+        "data_shape": [
+          4,
+          5
+        ],
+        "total_cells": 20,
+        "filled_cells": 0,
+        "has_prefilled": false
+      }
+    ]
+  }
+]
